@@ -253,7 +253,7 @@ if __name__ == '__main__':
     # * auction OB data
 
     # choosing note rate range
-    noterate_range = noterange_list[5]
+    noterate_range = noterange_list[3]
     # building path 
     filename_timeseries = f'{auction_filename}_mat{maturity}_loan{loantype}_timeseries_nr_{noterate_range[0]}_{noterate_range[1]}'
 
@@ -418,7 +418,7 @@ if __name__ == '__main__':
     plt.xlabel('Price')
     plt.ylabel('Frequency')
     plt.title('Distribution of bids')
-    plt.savefig(f'{auction_data_folder}/distribution_of_bids.png', dpi=300)
+    plt.savefig(f'{auction_save_folder}/distribution_of_bids.png', dpi=300)
     plt.show()  
 
 
