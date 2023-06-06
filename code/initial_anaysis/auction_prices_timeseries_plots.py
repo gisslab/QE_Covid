@@ -33,6 +33,8 @@ auction_data_folder = '/project/houde/mortgages/QE_Covid/data/data_auction/clean
 
 auction_save_folder = '/project/houde/mortgages/QE_Covid/results/figures'
 
+table_folder = '/project/houde/mortgages/QE_Covid/results/tables'
+
 auction_filename = 'combined_auctions_jan2018-jul2022_cleaned'
 
 bl_data_folder = '/project/houde/mortgages/QE_Covid/data/data_TBA/bloomberg/'
@@ -208,7 +210,38 @@ def plot(df, var, maturity, initial_stat = "Mean",
 
     return fig, ax
 
-  
+def create_table_stats(df,
+                       cols = ['LoanAmount', 'NoteRate', 'Price', 
+                                'DaysToAuction', 'Number of Participants', 'Number of Bulk Bidders',
+                                'dummy_sell_any', 'dummy_sell_winner'],
+                        mat = 30,
+                        loantype = 1,
+                        additional_name = '',
+                        stats = ['count','mean', 'std', 'min',  '25%', 'median', '75%', 'max']):
+    """
+    Creates a table with summary statistics for the variables in cols, returns a dataframe and save the latex. 
+    """
+    
+    # create table df with summary statistics from describe mean median min max 25 % 75 % std
+
+    df_table = df[cols].describe().T[['count','mean', 'std', '50%', 'min',  '25%', '75%', 'max']]
+    df_table = df_table.rename(columns={'50%': 'median'})
+    # rename variable names 
+    df_table = df_table.rename(index={'LoanAmount': 'Loan amount', 'NoteRate': 'Note rate', 'Price': 'Price',
+                                        'DaysToAuction': 'Days to auction', 'Number of Participants': 'Number of participants', 'Number of Bulk Bidders': 'Number of bulk bidders',
+                                        'dummy_sell_any': 'Sell rate', 'dummy_sell_winner': 'Rate sell to winner'})
+    # round all 
+    df_table = df_table.round(2)
+    # # add count, ommit nan
+    # df_table['count'] = df[cols].count()
+    # reorder columns
+    df_table = df_table[stats]
+
+    # to tex
+    df_table.to_latex(f'{table_folder}/auctions_level_mat{mat}_loan{loantype}_{additional_name}.tex')
+
+    return df_table
+
 #%%
 
 if __name__ == '__main__':
@@ -333,6 +366,12 @@ if __name__ == '__main__':
     var = 'bulk_bidders_fraction_mean'
     plot(ts, var, maturity, initial_stat = "Bulk bidders fraction", empty_label = True)
 
+    # %%
+    # * Enterprise sold
+    
+    f,a = plot(ts, 'sold_FannieBid_mean', maturity, initial_stat = "fraction sold", empty_label = True, color = 'tab:blue', legend=True, legendlabel = 'Fannie Mae', save=False)
+    f,a = plot(ts, 'sold_FreddieBid_mean', maturity, initial_stat = "fraction sold", fig = f, ax = a, color = 'tab:orange', legend=True, legendlabel = 'Freddie Mac', save=True)
+    # f,a = plot(ts, 'sold_GinnieBid_mean', maturity, initial_stat = "fraction sold", fig = f, ax = a, color = 'tab:green', legend=True, legendlabel = 'Ginnie Mae', save=True)
 
     # # %% 
     # # * std
@@ -354,12 +393,65 @@ if __name__ == '__main__':
 
 
 
-    # * end of main
-
-
     
 
+    # ******** Table Auctions ******** #
 
+    # * read bid level data
+    # %%
+    # combined_auctions_jan2018-jul2022_cleaned_mat30_loan1
+    filename = f'{auction_filename}_mat{maturity}_loan{loantype}'
+
+    df = read_data(file = filename, path = auction_data_folder, 
+                   datetime_vars=['BorrowerClosingDate', 'CommittedDate' ])
+
+
+    # %%
+    df.columns
+    
+    # %%
+    # dates range see
+    df['CommittedDate'].describe()
+    # %%
+    # plot distribution of bids , var is Price, soft color, transparecy , no vertical line, bo bakground vertical lines
+    df['Price'].hist(bins=40, color = 'tab:blue', alpha = 0.5, edgecolor='black', linewidth=1.2, grid=False)
+    plt.xlabel('Price')
+    plt.ylabel('Frequency')
+    plt.title('Distribution of bids')
+    plt.savefig(f'{auction_data_folder}/distribution_of_bids.png', dpi=300)
+    plt.show()  
+
+
+    # %%
+
+
+    # * read auction level data
+    # %%
+    
+    # read 
+    filename = f'{auction_filename}_mat{maturity}_loan{loantype}_auction_level'
+    df = read_data(file = filename, path = auction_data_folder,
+                   datetime_vars=['BorrowerClosingDate', 'CommittedDate' ])
+    df.columns
+
+    # %%
+    table = create_table_stats(df, additional_name='all')
+
+    # %%
+    # repeat for January and February only
+    df1 = df[df['CommittedDate'] < pd.to_datetime('2020-03-01')]
+    table1 = create_table_stats(df1, additional_name='jan-feb', 
+                                stats = ['count', 'mean', 'std', 'min', 'max'])
+    table1
+
+    # %%
+    # march april
+    df2 = df[(df['CommittedDate'] >= pd.to_datetime('2020-03-01')) 
+                & (df['CommittedDate'] < pd.to_datetime('2020-05-01'))]
+    table2 = create_table_stats(df2, additional_name='mar-apr',
+                                stats = ['count', 'mean', 'std', 'min', 'max'])
+    table2
+    # * end of main
 
 
 
