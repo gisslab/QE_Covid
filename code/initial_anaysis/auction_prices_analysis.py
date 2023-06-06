@@ -156,9 +156,10 @@ def clean_data(df):
     # Alternatively choose only 30 year fixed rate loans: Conf 30 Yr Fixed
     # df = df[df['ProductType'] == 'Conf 30 Yr Fixed']
 
-    # dates between April 1st and April 15th, 2020
+    # dates between interval
     df['CommittedDate'] = pd.to_datetime(df['CommittedDate'])
     df = df[(df['CommittedDate'] >= dateinit) & (df['CommittedDate'] <= dateend)]
+    df['BorrowerClosingDate'] = pd.to_datetime(df['BorrowerClosingDate'])
 
     # convert loan ammount to thousands
     df['LoanAmount'] = df['LoanAmount']/1000
