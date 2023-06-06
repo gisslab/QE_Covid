@@ -24,6 +24,8 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 import matplotlib.pyplot as plt
+import auction_prices_analysis as ap
+
 
 # * settings
 
@@ -42,7 +44,7 @@ maturity = 30
 loantype = 1
 """ Type of the auctioned loans. 1 = Conforming"""
 
-noterange_list = [(1,7),(2, 2.75), (2.75, 3.5), (3, 3.75), (3.75, 5.25),(4, 4.75), (5, 7)]
+noterange_list = ap.noterange_list #[(1,7),(2, 2.75), (2.75, 3.5), (3, 3.75), (3.75, 5.25),(4, 4.75), (5, 7)]
 """ List of tuples with the min and max note rates to filter the data. Index 0 is all the note rates. """
 
 
@@ -52,9 +54,9 @@ collapsed_note_rate_list = [2.5, 3, 3.75, 4.25, 4.5,  5,  5.5,  6]
 
 # * functions
 
-def read_data(file, path):
+def read_data(file, path, datetime_vars = ['CommittedDate', 'BorrowerClosingDate']):
     """
-    This function reads the data from the auction data folder and returns a dataframe.
+    This function reads the data from the path data folder and returns a dataframe.
     """
 
     filepath = f'{path}/{file}.csv'
@@ -62,7 +64,7 @@ def read_data(file, path):
     try: 
         df_auc = pd.read_csv(filepath,
                             sep='|',
-                            parse_dates=['CommittedDate', 'BorrowerClosingDate']
+                            parse_dates= datetime_vars
                             )
 
         return df_auc
@@ -70,6 +72,46 @@ def read_data(file, path):
         print('Error reading the data: ',filepath, ", ", e)
         return None
     
+def tide_auction_data(df, min_date = '2020-01-01', max_date = '2020-05-01', min_daily_count = 5):
+    """
+    Receives auction data daily time series cleaned by auction_prices_analysis module and returns cleaner data ready to be used in plot function.
+    """
+    
+    df = df[ (df['CommittedDate'] >= pd.to_datetime(min_date)) & (df['CommittedDate'] < pd.to_datetime(max_date)) ]
+    # rename to Trading_Date to plot with the TBA data
+    df = df.rename(columns = {'CommittedDate': 'Trading_Date'})
+
+    # if count < 1 delete, so small number of observations do not create additional noise. 
+    df = df[df['winner_bid_count'] >= min_daily_count]
+
+    return df
+
+
+def tide_collapse_bloomberg_data(df_, noterate_range,
+                                min_date = '2020-01-01', max_date = '2020-05-01', 
+                                tickers = ['FNCL', 'FGLMC'] 
+                                ):
+    """
+    Receives bloomberg data daily cleaned and returns cleaner time series data ready to be used in plot function.
+    """
+    df = df_.copy()
+    # trading dates 2020
+    # df = df[df['Trading_Date'].dt.year == 2020] # same dates that other dataset
+    df = df[(df['Trading_Date'] < pd.to_datetime(max_date)) & (df['Trading_Date'] >= pd.to_datetime(min_date))]
+
+    # coopon rate that is between noterate_range
+    df = df[(df['Coupon'] >= noterate_range[0]-0.5) & (df['Coupon'] < noterate_range[1])]
+
+    print("Coupons in range: ", df['Coupon'].unique())
+
+    # # ? ticker FNCL and maybe FGLMC
+    df = df[df['Ticker'].isin(tickers)]
+    # group by to get one price PX_Last per day (avg across months forwards and ticker )
+    df = df.groupby(['Trading_Date']).agg({'PX_Last': 'mean'}).reset_index()
+
+    print("Number of observations: ", df.shape[0])
+
+    return df
 
 
 def collapse_note_rates(df, list_bins):
@@ -125,7 +167,7 @@ def filter_bins_rates(df, min_rate, max_rate):
 def plot(df, var, maturity, initial_stat = "Mean",
           vertical_lines = ["2020-03-01","2020-04-01", "2020-04-15"],
           fig = None, ax = None, color = 'tab:blue',
-          save = True, , empty_label = False,
+          save = True, empty_label = False,
           legend = False, legendlabel = "_nolegend_",
           title = False):
     """
@@ -178,66 +220,37 @@ if __name__ == '__main__':
     # * auction OB data
 
     # choosing note rate range
-    noterate_range = noterange_list[0]
+    noterate_range = noterange_list[5]
     # building path 
     filename_timeseries = f'{auction_filename}_mat{maturity}_loan{loantype}_timeseries_nr_{noterate_range[0]}_{noterate_range[1]}'
 
     print('Note rate range: ', noterate_range)
 
     df_ts = read_data(file = filename_timeseries, path = auction_data_folder)
-    df_ts = df_ts[df_ts['CommittedDate'] >= '2020-01-01']
-    # rename to Trading_Date
-    df_ts = df_ts.rename(columns = {'CommittedDate': 'Trading_Date'})
 
-        # %%
+    # %%
     df_ts.columns
-    # %%
-    # print("Unique note rates: ", df_ts['NoteRate'].nunique())
-    # df_ts.value_counts('NoteRate')
-
-    # %%
-    # df_ts = collapse_note_rates(df_ts, collapsed_note_rate_list)
-    # df_ts['NoteRate_bins'].value_counts()
 
     # %%
     # ts = filter_bins_rates(df_ts, min_rate = 3, max_rate = 3.75)
-    ts = df_ts
-    # if count < 1 delete, so small number of observations do not create additional noise. 
-    ts = ts[ts['winner_bid_count'] >= 5]
-
-
+    ts = tide_auction_data(df_ts)
+    ts.head()
     # %%
 
     # * bloomberg data
 
     # bloomberg_daily_trading_prices_w_forwards bloomberg_daily_trading_prices
 
-    df_bl = pd.read_csv(f'{bl_data_folder}/clean_data/bloomberg_daily_trading_prices.csv',
-                    sep='|'
-                    )
-    df_bl.columns
+    df_bl = read_data(file = 'bloomberg_daily_trading_prices', path = f'{bl_data_folder}/clean_data/', datetime_vars=['Trading_Date', 'Settlement_Date'])
+    df_bl.head()
 
     # %%
-    # convert to date time
-    df_bl['Trading_Date'] = pd.to_datetime(df_bl['Trading_Date'])
-    df_bl.Trading_Date.describe()
-    # %%
-    # trading date 2020
-    df_bl_2020 = df_bl[df_bl['Trading_Date'].dt.year == 2020] # same dates that other dataset
-    df_bl_2020 = df_bl_2020[df_bl_2020['Trading_Date'] <= '2020-04-30']
-
-    # coopon rate that is between noterate_range
-    df_bl_2020 = df_bl_2020[(df_bl_2020['Coupon'] >= noterate_range[0]) & (df_bl_2020['Coupon'] < noterate_range[1])]
-
-    # ? ticker FNCL and maybe FGLMC
-    df_bl_2020 = df_bl_2020[df_bl_2020['Ticker'].isin(['FNCL', 'FGLMC'])]
-
-    # %%
-    df_bl_2020.describe()
-    # %%
-    # group by to get one price PX_Last per day (avg across months forwards and ticker )
-    df_bl_2020 = df_bl_2020.groupby(['Trading_Date']).agg({'PX_Last': 'mean'}).reset_index()
-
+    df_bl_2020 = tide_collapse_bloomberg_data(df_bl, noterate_range= noterate_range)
+    df_bl_2020.head()
+    # 0 Coupons in range:  [2.5 3.  3.5 4.  4.5 5.  5.5 6.  6.5]
+    # 3 [2.5 3.  3.5]
+    # 5 Coupons in range:  [3.5 4.  4.5]
+    #! Alternative pick one note rate 
 
 
     # %%
@@ -300,6 +313,11 @@ if __name__ == '__main__':
     plot(ts, var, maturity, initial_stat = "Rate sell to winner", empty_label = True)
 
     # %%
+    # * number of participants
+    var = 'Number of Participants_mean'
+    plot(ts, var, maturity, initial_stat = "Number of participants", empty_label = True)
+
+    # %%
     
     # * number of enterprise bidders
     var = 'Number of Enterprise Bidders_mean'
@@ -311,9 +329,10 @@ if __name__ == '__main__':
     plot(ts, var, maturity, initial_stat = "Number of bulk bidders", empty_label = True)
 
     # %%
-    # * number of participants
-    var = 'Number of Participants_mean'
-    plot(ts, var, maturity, initial_stat = "Number of participants", empty_label = True)
+    # * bulk bidders fraction
+    var = 'bulk_bidders_fraction_mean'
+    plot(ts, var, maturity, initial_stat = "Bulk bidders fraction", empty_label = True)
+
 
     # # %% 
     # # * std
@@ -335,9 +354,7 @@ if __name__ == '__main__':
 
 
 
-
-
-
+    # * end of main
 
 
     

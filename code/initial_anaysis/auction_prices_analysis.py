@@ -97,6 +97,11 @@ dateinit = '2020-01-01'
 dateend = '2020-04-30'
 """ End date of the auctioned loans."""
 
+noterange_list = [(1,7),(2, 2.75), (2.75, 3.5), (3, 3.75), (3.75, 5.25),(4, 4.75), (5, 7)]
+""" List of tuples with the ranges of the note rate to be used in the analysis. The elements are:
+[(1,7),(2, 2.75), (2.75, 3.5), (3, 3.75), (3.75, 5.25),(4, 4.75), (5, 7)] """
+
+
 # * stat functions
 
 def coeff_var(x):
@@ -185,6 +190,9 @@ def clean_data(df):
     df['sold_FreddieBid'] = df['CommittedInvestorKey'].isin([22,23])
     df['sold_GinnieBid'] = df['CommittedInvestorKey'] == 51
 
+    # bulk bidders percentage
+    df['bulk_bidders_fraction'] = df['Number of Bulk Bidders']/df['Number of Participants']
+
 
     # * end, summary and save 
     print("Summary of the data: ", df.describe())
@@ -225,6 +233,7 @@ def create_measures_collapse(df):
                                         'sold_FannieBid': 'first',
                                         'sold_FreddieBid': 'first',
                                         'sold_GinnieBid': 'first',
+                                        'bulk_bidders_fraction': 'first',
                                         }).reset_index()
 
     
@@ -288,6 +297,7 @@ def to_time_series(df, bynote=False, add_name = ''):
                                 'sold_FannieBid': 'mean',
                                 'sold_FreddieBid': 'mean',
                                 'sold_GinnieBid': 'mean',
+                                'bulk_bidders_fraction': 'mean',
                                 # 'loan_weight' : 'sum'
                                 }).reset_index()
     
@@ -321,6 +331,7 @@ def to_time_series(df, bynote=False, add_name = ''):
 
 if __name__ == '__main__':
 
+    # * Reading and processing OB data
     # %%
     df = read_data()
 
@@ -331,8 +342,11 @@ if __name__ == '__main__':
     # %%
     df1 = clean_data(df)
     # %%
-    df1[['CommittedInvestorKey', 'HedgeInvestorKey',  'WinnerHedgeInvestorKey','dummy_sell', 'dummy_sell_any', 'dummy_sell_winner']].head(25)
+    df1[['Auction ID','CommittedInvestorKey', 'HedgeInvestorKey',  'WinnerHedgeInvestorKey','dummy_sell', 'dummy_sell_any', 'dummy_sell_winner', 'Number of Participants']].head(25)
 
+    # %%
+    df1[['Auction ID','CommittedInvestorKey', 'HedgeInvestorKey', 'Number of Participants', 'Number of Bulk Bidders','bulk_bidders_fraction' ]].head(25)
+    
     # %%
     df_auc = create_measures_collapse(df1)
 
@@ -341,14 +355,14 @@ if __name__ == '__main__':
 
     # %%
 
-    df_auc[['dummy_sell_any','dummy_sell_winner', 'sold_FannieBid', 'sold_FreddieBid', 'sold_GinnieBid' ]].describe()
+    df_auc[['Auction ID','dummy_sell_any','dummy_sell_winner', 'sold_FannieBid', 'sold_FreddieBid', 'sold_GinnieBid' ]].describe()
 
     # %%
     # df_time_series = to_time_series(df_auc)
 
     # %%
 
-    noterange_list = [(2, 2.75), (2.75, 3.5), (3, 3.75), (3.75, 5.25),(4, 4.75), (5, 7), (1,7)]
+    noterange_list = [(1,7),(2, 2.75), (2.75, 3.5), (3, 3.75), (3.75, 5.25),(4, 4.75), (5, 7)]
 
     print("*********  Note rates intervals  *********")
     for (min_nr, max_nr) in noterange_list:
@@ -360,7 +374,7 @@ if __name__ == '__main__':
     # %%
     df_time_series_1[['w_winner_bid_mean', 'winner_bid_mean']].head(30)
 
-
+    # * end of main
 
 
 # %%
