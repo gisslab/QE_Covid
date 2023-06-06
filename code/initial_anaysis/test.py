@@ -4,6 +4,8 @@ import os
 import pandas as pd
 import numpy as np
 
+#%%
+
 auction_data_folder = '/project/houde/mortgages/data/raw/ob_auctions/auction_data_2018-09-01'
 auction_save_folder = '/project/houde/mortgages/data/intermediate/ob_auctions'
 
@@ -103,4 +105,36 @@ for col in df_auc.columns[21:41]:
 for col in df_auc.columns[41:62]:
     print(col, " - ", df_auc.loc[0,col])
 
+# %%
+
+
+### * blomberg data testing * ###
+
+bl_data_folder = '/project/houde/mortgages/QE_Covid/data/data_TBA/bloomberg/'
+
+df_bl = pd.read_csv(f'{bl_data_folder}/clean_data/bloomberg_daily_trading_prices.csv',
+                     sep='|'
+                     )
+# bloomberg_daily_trading_prices_w_forwards
+# %%
+df_bl.info()
+# %%
+df_bl.head(30)
+# %%
+
+df_bl.columns
+# %%
+df_bl.describe()
+# %%
+# conver to date time
+df_bl['Trading_Date'] = pd.to_datetime(df_bl['Trading_Date'])
+df_bl.Trading_Date.describe()
+# %%
+# trading date 2020
+df_bl_2020 = df_bl[df_bl['Trading_Date'].dt.year == 2020]
+
+# %%
+df_bl_2020.Ticker.value_counts()
+# %%
+df_bl_2020.Forward_Trading_Months.value_counts()
 # %%

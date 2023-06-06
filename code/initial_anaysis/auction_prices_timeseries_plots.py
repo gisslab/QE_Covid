@@ -33,6 +33,9 @@ auction_save_folder = '/project/houde/mortgages/QE_Covid/results/figures'
 
 auction_filename = 'combined_auctions_jan2018-jul2022_cleaned'
 
+bl_data_folder = '/project/houde/mortgages/QE_Covid/data/data_TBA/bloomberg/'
+
+
 maturity = 30
 """ Maturity of the auctioned loans in years."""
 
@@ -122,7 +125,9 @@ def filter_bins_rates(df, min_rate, max_rate):
 def plot(df, var, maturity, initial_stat = "Mean",
           vertical_lines = ["2020-03-01","2020-04-01", "2020-04-15"],
           fig = None, ax = None, color = 'tab:blue',
-          save = True, legend = False, empty_label = False, legendlabel = "_nolegend_"):
+          save = True, , empty_label = False,
+          legend = False, legendlabel = "_nolegend_",
+          title = False):
     """
     This function plots the time series of the variable var.
     """
@@ -131,13 +136,14 @@ def plot(df, var, maturity, initial_stat = "Mean",
     # plot the time series
     if fig is None:
         fig, ax = plt.subplots(figsize=(8, 6))
-    ax.plot(df['CommittedDate'], df[var], color = color, label = legendlabel)
+    ax.plot(df['Trading_Date'], df[var], color = color, label = legendlabel)
     # x axis labels, only 10 dates
-    ax.set_xticks(df['CommittedDate'][::int(len(df)/12)])
+    ax.set_xticks(df['Trading_Date'][::int(len(df)/12)])
     # rotate the x axis labels
     plt.xticks(rotation=45)
     # add title
-    plt.title(f'{initial_stat} {additional} for loans with maturity {maturity} years')
+    if title:
+        plt.title(f'{initial_stat} {additional} for loans with maturity {maturity} years')
     # y axis name
     plt.ylabel(f'{yadd} {initial_stat.lower()}')
     plt.xlabel('Date')
@@ -167,9 +173,12 @@ if __name__ == '__main__':
 
     
     # %%
+    # ************* Data ************* #
+
+    # * auction OB data
 
     # choosing note rate range
-    noterate_range = noterange_list[5]
+    noterate_range = noterange_list[0]
     # building path 
     filename_timeseries = f'{auction_filename}_mat{maturity}_loan{loantype}_timeseries_nr_{noterate_range[0]}_{noterate_range[1]}'
 
@@ -177,8 +186,10 @@ if __name__ == '__main__':
 
     df_ts = read_data(file = filename_timeseries, path = auction_data_folder)
     df_ts = df_ts[df_ts['CommittedDate'] >= '2020-01-01']
+    # rename to Trading_Date
+    df_ts = df_ts.rename(columns = {'CommittedDate': 'Trading_Date'})
 
-    # %%
+        # %%
     df_ts.columns
     # %%
     # print("Unique note rates: ", df_ts['NoteRate'].nunique())
@@ -191,14 +202,52 @@ if __name__ == '__main__':
     # %%
     # ts = filter_bins_rates(df_ts, min_rate = 3, max_rate = 3.75)
     ts = df_ts
-    # if count < 1 delete
+    # if count < 1 delete, so small number of observations do not create additional noise. 
     ts = ts[ts['winner_bid_count'] >= 5]
 
+
+    # %%
+
+    # * bloomberg data
+
+    # bloomberg_daily_trading_prices_w_forwards bloomberg_daily_trading_prices
+
+    df_bl = pd.read_csv(f'{bl_data_folder}/clean_data/bloomberg_daily_trading_prices.csv',
+                    sep='|'
+                    )
+    df_bl.columns
+
+    # %%
+    # convert to date time
+    df_bl['Trading_Date'] = pd.to_datetime(df_bl['Trading_Date'])
+    df_bl.Trading_Date.describe()
+    # %%
+    # trading date 2020
+    df_bl_2020 = df_bl[df_bl['Trading_Date'].dt.year == 2020] # same dates that other dataset
+    df_bl_2020 = df_bl_2020[df_bl_2020['Trading_Date'] <= '2020-04-30']
+
+    # coopon rate that is between noterate_range
+    df_bl_2020 = df_bl_2020[(df_bl_2020['Coupon'] >= noterate_range[0]) & (df_bl_2020['Coupon'] < noterate_range[1])]
+
+    # ? ticker FNCL and maybe FGLMC
+    df_bl_2020 = df_bl_2020[df_bl_2020['Ticker'].isin(['FNCL', 'FGLMC'])]
+
+    # %%
+    df_bl_2020.describe()
+    # %%
+    # group by to get one price PX_Last per day (avg across months forwards and ticker )
+    df_bl_2020 = df_bl_2020.groupby(['Trading_Date']).agg({'PX_Last': 'mean'}).reset_index()
+
+
+
+    # %%
+    # ******** Plots ******** #
     # %%
     #* count
 
     var = 'winner_bid_count'
-    plot(ts, var, maturity,  initial_stat = "Count")
+    plot(ts, var, maturity,  initial_stat = "Count", legendlabel="OB")
+
     # %%
     # * loan amount sum
     var = 'LoanAmount_sum'
@@ -224,15 +273,16 @@ if __name__ == '__main__':
     
     # %%
     # * mean (w if weighted)
-
     var = 'w_winner_bid_mean'
-    plot(ts, var, maturity)
-    # add legend
+    # add bloomberg
+    f, a = plot(df_bl_2020, var = 'PX_Last', maturity = maturity, initial_stat = "",  color = 'tab:orange', legend=True, legendlabel = 'Bloomberg', save=False)
+    f, a = plot(ts, var, maturity, initial_stat = "Mean", fig = f, ax = a, color = 'tab:blue', legend=True, legendlabel = 'OB', save=True)
 
+    # %%
     # * median 
-    #  
     var = 'winner_bid_median'
-    plot(ts, var, maturity, initial_stat = "Median")
+    f, a = plot(df_bl_2020, var = 'PX_Last', maturity = maturity, initial_stat = "",  color = 'tab:orange', legend=True, legendlabel = 'Bloomberg', save=False)
+    plot(ts, var, maturity, initial_stat = "Median", fig = f, ax = a, color = 'tab:blue', legend=True, legendlabel = 'OB', save=True)
     
     # %%
     # * days to auction
@@ -248,6 +298,23 @@ if __name__ == '__main__':
     # * dummy sell winner
     var = 'dummy_sell_winner_mean'
     plot(ts, var, maturity, initial_stat = "Rate sell to winner", empty_label = True)
+
+    # %%
+    
+    # * number of enterprise bidders
+    var = 'Number of Enterprise Bidders_mean'
+    plot(ts, var, maturity, initial_stat = "Number of enterprise bidders", empty_label = True)
+
+    # %%
+    # * number of bulk bidders
+    var = 'Number of Bulk Bidders_mean'
+    plot(ts, var, maturity, initial_stat = "Number of bulk bidders", empty_label = True)
+
+    # %%
+    # * number of participants
+    var = 'Number of Participants_mean'
+    plot(ts, var, maturity, initial_stat = "Number of participants", empty_label = True)
+
     # # %% 
     # # * std
 
