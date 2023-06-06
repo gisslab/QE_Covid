@@ -58,8 +58,10 @@ def read_data(file, path):
     print('Reading data from: ', filepath)
     try: 
         df_auc = pd.read_csv(filepath,
-                            sep='|'
+                            sep='|',
+                            parse_dates=['CommittedDate', 'BorrowerClosingDate']
                             )
+
         return df_auc
     except Exception as e:
         print('Error reading the data: ',filepath, ", ", e)
@@ -117,20 +119,21 @@ def filter_bins_rates(df, min_rate, max_rate):
     return df
 
 
-def plot(df, var, maturity, initial_stat = "Mean", vertical_lines = ["2020-03-01","2020-04-01", "2020-04-15"],
+def plot(df, var, maturity, initial_stat = "Mean",
+          vertical_lines = ["2020-03-01","2020-04-01", "2020-04-15"],
           fig = None, ax = None, color = 'tab:blue',
           save = True, legend = False, empty_label = False, legendlabel = "_nolegend_"):
     """
     This function plots the time series of the variable var.
     """
-    additional = '' if empty_label else 'of the winner bid prices'
-    yadd = '' if empty_label else 'Winner bid'
+    additional = '' if empty_label else 'of the bid prices'
+    yadd = '' if empty_label else 'Highest bid'
     # plot the time series
     if fig is None:
         fig, ax = plt.subplots(figsize=(8, 6))
-    ax.plot(ts['CommittedDate'], ts[var], color = color, label = legendlabel)
+    ax.plot(df['CommittedDate'], df[var], color = color, label = legendlabel)
     # x axis labels, only 10 dates
-    ax.set_xticks(ts['CommittedDate'][::int(len(ts)/12)])
+    ax.set_xticks(df['CommittedDate'][::int(len(df)/12)])
     # rotate the x axis labels
     plt.xticks(rotation=45)
     # add title
@@ -147,7 +150,7 @@ def plot(df, var, maturity, initial_stat = "Mean", vertical_lines = ["2020-03-01
                     wspace=0.01)
 
     for vl in vertical_lines:
-        plt.axvline(x=vl, color='r', linestyle='--', linewidth=1, alpha = 0.7, label = None)
+        plt.axvline(x=pd.to_datetime(vl), color='r', linestyle='--', linewidth=1, alpha = 0.7, label = None)
 
     if legend:
         plt.legend(loc="upper left")
@@ -164,12 +167,13 @@ if __name__ == '__main__':
 
     
     # %%
-    print('Note rate range: ', noterate_range)
 
     # choosing note rate range
-    noterate_range = noterange_list[0]
+    noterate_range = noterange_list[5]
     # building path 
     filename_timeseries = f'{auction_filename}_mat{maturity}_loan{loantype}_timeseries_nr_{noterate_range[0]}_{noterate_range[1]}'
+
+    print('Note rate range: ', noterate_range)
 
     df_ts = read_data(file = filename_timeseries, path = auction_data_folder)
     df_ts = df_ts[df_ts['CommittedDate'] >= '2020-01-01']
