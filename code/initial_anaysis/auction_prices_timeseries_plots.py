@@ -74,7 +74,9 @@ def read_data(file, path, datetime_vars = ['CommittedDate', 'BorrowerClosingDate
         print('Error reading the data: ',filepath, ", ", e)
         return None
     
-def tide_auction_data(df, min_date = '2020-01-01', max_date = '2020-05-01', min_daily_count = 5):
+def tide_auction_data(df, 
+                      min_date = '2020-01-01', max_date = '2021-12-31', 
+                      min_daily_count = 20):
     """
     Receives auction data daily time series cleaned by auction_prices_analysis module and returns cleaner data ready to be used in plot function.
     """
@@ -90,7 +92,7 @@ def tide_auction_data(df, min_date = '2020-01-01', max_date = '2020-05-01', min_
 
 
 def tide_collapse_bloomberg_data(df_, noterate_range,
-                                min_date = '2020-01-01', max_date = '2020-05-01', 
+                                min_date = '2020-01-01', max_date = '2021-12-31', #'2020-05-01'
                                 tickers = ['FNCL', 'FGLMC'] 
                                 ):
     """
@@ -167,7 +169,7 @@ def filter_bins_rates(df, min_rate, max_rate):
 
 
 def plot(df, var, maturity, initial_stat = "Mean",
-          vertical_lines = ["2020-03-01","2020-04-01", "2020-04-15"],
+          vertical_lines = ["2020-03-01"], #["2020-03-01","2020-04-01", "2020-04-15"],
           fig = None, ax = None, color = 'tab:blue',
           save = True, empty_label = False,
           legend = False, legendlabel = "_nolegend_",
@@ -253,7 +255,7 @@ if __name__ == '__main__':
     # * auction OB data
 
     # choosing note rate range
-    noterate_range = noterange_list[3]
+    noterate_range = noterange_list[0]
     # building path 
     filename_timeseries = f'{auction_filename}_mat{maturity}_loan{loantype}_timeseries_nr_{noterate_range[0]}_{noterate_range[1]}'
 

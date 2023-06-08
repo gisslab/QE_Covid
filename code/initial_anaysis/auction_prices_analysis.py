@@ -94,7 +94,7 @@ loantype = 1
 dateinit = '2020-01-01'
 """ Initial date of the auctioned loans."""
 
-dateend = '2020-04-30'
+dateend = '2021-12-31'
 """ End date of the auctioned loans."""
 
 noterange_list = [(1,7),(2, 2.75), (2.75, 3.5), (3, 3.75), (3.75, 5.25),(4, 4.75), (5, 7)]
