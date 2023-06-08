@@ -97,9 +97,9 @@ dateinit = '2020-01-01'
 dateend = '2021-12-31'
 """ End date of the auctioned loans."""
 
-noterange_list = [(1,7),(2, 2.75), (2.75, 3.5), (3, 3.75), (3.75, 5.25),(4, 4.75), (5, 7)]
+noterange_list = [(1,7),(2, 2.75), (2.75, 3.5), (3, 3.75), (3.75, 5.25),(4, 4.75), (5, 7), (3.5, 3.5), (4.5, 4.5)]
 """ List of tuples with the ranges of the note rate to be used in the analysis. The elements are:
-[(1,7),(2, 2.75), (2.75, 3.5), (3, 3.75), (3.75, 5.25),(4, 4.75), (5, 7)] """
+[(1,7),(2, 2.75), (2.75, 3.5), (3, 3.75), (3.75, 5.25),(4, 4.75), (5, 7),(3.5, 3.5), (4.5, 4.5) ] """
 
 
 # * stat functions
@@ -358,11 +358,11 @@ if __name__ == '__main__':
     df_auc[['Auction ID','dummy_sell_any','dummy_sell_winner', 'sold_FannieBid', 'sold_FreddieBid', 'sold_GinnieBid' ]].describe()
 
     # %%
-    # df_time_series = to_time_series(df_auc)
+    df_time_series = to_time_series(df_auc, bynote=True)
 
     # %%
 
-    noterange_list = [(1,7),(2, 2.75), (2.75, 3.5), (3, 3.75), (3.75, 5.25),(4, 4.75), (5, 7)]
+    # noterange_list = [(1,7),(2, 2.75), (2.75, 3.5), (3, 3.75), (3.75, 5.25),(4, 4.75), (5, 7), (3.5, 3.5), (4.5, 4.5)]
 
     print("*********  Note rates intervals  *********")
     for (min_nr, max_nr) in noterange_list:

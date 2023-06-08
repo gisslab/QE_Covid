@@ -76,7 +76,8 @@ def read_data(file, path, datetime_vars = ['CommittedDate', 'BorrowerClosingDate
     
 def tide_auction_data(df, 
                       min_date = '2020-01-01', max_date = '2021-12-31', 
-                      min_daily_count = 20):
+                      min_daily_count = 10,
+                      noterate_range = (1,7)):
     """
     Receives auction data daily time series cleaned by auction_prices_analysis module and returns cleaner data ready to be used in plot function.
     """
@@ -88,12 +89,18 @@ def tide_auction_data(df,
     # if count < 1 delete, so small number of observations do not create additional noise. 
     df = df[df['winner_bid_count'] >= min_daily_count]
 
+    # NoteRate range if NoteRate is a column 
+    if 'NoteRate' in df.columns:
+        print("NoteRate range: ", noterate_range)
+        df = df[(df['NoteRate'] >= noterate_range[0]) & (df['NoteRate'] <= noterate_range[1])]  
+
     return df
 
 
 def tide_collapse_bloomberg_data(df_, noterate_range,
                                 min_date = '2020-01-01', max_date = '2021-12-31', #'2020-05-01'
-                                tickers = ['FNCL', 'FGLMC'] 
+                                tickers = ['FNCL', 'FGLMC'],
+                                service_fee = 0.75
                                 ):
     """
     Receives bloomberg data daily cleaned and returns cleaner time series data ready to be used in plot function.
@@ -104,14 +111,15 @@ def tide_collapse_bloomberg_data(df_, noterate_range,
     df = df[(df['Trading_Date'] < pd.to_datetime(max_date)) & (df['Trading_Date'] >= pd.to_datetime(min_date))]
 
     # coopon rate that is between noterate_range
-    df = df[(df['Coupon'] >= noterate_range[0]-0.5) & (df['Coupon'] < noterate_range[1])]
+    df = df[(df['Coupon'] >= noterate_range[0]- service_fee - 0.25) 
+            & (df['Coupon'] < noterate_range[1] - service_fee + 0.25)]
 
     print("Coupons in range: ", df['Coupon'].unique())
 
     # # ? ticker FNCL and maybe FGLMC
     df = df[df['Ticker'].isin(tickers)]
-    # group by to get one price PX_Last per day (avg across months forwards and ticker )
-    df = df.groupby(['Trading_Date']).agg({'PX_Last': 'mean'}).reset_index()
+    # group by to get one price PX_Last, per day, coupon (avg across months forwards and ticker )
+    df = df.groupby(['Trading_Date', 'Coupon']).agg({'PX_Last': 'mean'}).reset_index()
 
     print("Number of observations: ", df.shape[0])
 
@@ -182,7 +190,8 @@ def plot(df, var, maturity, initial_stat = "Mean",
     # plot the time series
     if fig is None:
         fig, ax = plt.subplots(figsize=(8, 6))
-    ax.plot(df['Trading_Date'], df[var], color = color, label = legendlabel)
+
+    ax.plot(df['Trading_Date'], df[var], color = color, label = legendlabel, alpha = 0.8)
     # x axis labels, only 10 dates
     ax.set_xticks(df['Trading_Date'][::int(len(df)/12)])
     # rotate the x axis labels
@@ -244,7 +253,86 @@ def create_table_stats(df,
 
     return df_table
 
+def build_values_note_rate_from_TBA(df_tba,
+                                    df_noterate_timeseries,
+                                    maturity = 30,
+                                    loantype = 1,
+                                    noterate_range = [2.5, 3.5]):
+    """
+    This function builds the values of the note rate from the TBA data.
+    """
+    # filter df_nr by noterate range, NoteRate variable
+    df_noterate_timeseries.loc[ (df_noterate_timeseries['NoteRate'] >= noterate_range[0]) &
+                                                     (df_noterate_timeseries['NoteRate'] <= noterate_range[1]), :]
+    
+
+    # for each note rate calculate the value of the note rate from the TBA data 
+
+    df_noterate_timeseries.loc[:, 'value_note_rate'] = df_noterate_timeseries.apply(
+                                            lambda x: compute_note_rate_value(x, df_tba),
+                                            axis = 1)
+    
+    
+    # collapse all values by mean weighting by LoanAmount_sum by Trading_Date
+    # create loan amount sum by Trading_Date, sums across NoteRate
+    df_noterate_timeseries.loc[:,'LoanAmount_sum_tot'] = df_noterate_timeseries.groupby('Trading_Date')['LoanAmount_sum'].transform('sum')
+    df_noterate_timeseries['weight'] = df_noterate_timeseries['LoanAmount_sum'] / df_noterate_timeseries['LoanAmount_sum_tot']
+    df_noterate_timeseries['w_value_note_rate'] = df_noterate_timeseries['value_note_rate'] * df_noterate_timeseries['weight']
+ 
+
+    # create weighted measure of value_note_rate by date
+    df_noterate_timeseries['value_day'] = df_noterate_timeseries.groupby('Trading_Date')['w_value_note_rate'].transform('sum')
+
+
+    #! Depending on how you weight by date you get different results
+    #! e.g. by the amounts of the loans for each note rate
+    # or all the same
+
+    # rename  w_value_note_rate to PX_Last
+    df_noterate_timeseries = df_noterate_timeseries.rename(columns={'w_value_note_rate': 'PX_Last'})
+
+    print(df_noterate_timeseries[["weight", "PX_Last", "value_note_rate"]].describe())
+
+    # collapse by date
+    # df_noterate_timeseries = df_noterate_timeseries.groupby('Trading_Date').sum( numeric_only = True).reset_index()
+    # group by Note rate mean, PX_Last sum , by Trading_Date, weight sum, value_note_rate mean 
+
+    df_noterate_timeseries = df_noterate_timeseries.groupby('Trading_Date').agg({'NoteRate': 'mean', 
+                                                                                'PX_Last': 'sum',
+                                                                                'weight': 'sum', 
+                                                                                'value_note_rate': 'mean',
+                                                                                'value_day': 'mean'}
+                                                                                ).reset_index() 
+
+
+    return df_noterate_timeseries
+
+
+
+def compute_note_rate_value(row, df_tba, service_fee = 0.75):
+    """
+    This function computes the value of the note rate from the TBA data.
+    """
+    # filter by day Trading_Date
+    # .loc[row_indexer,col_indexer] = value instead
+    # df_tba_ = df_tba[df_tba['Trading_Date'] == row['Trading_Date']]
+    df_tba_ = df_tba.loc[df_tba['Trading_Date'] == row['Trading_Date'], :]
+
+    # filter df_nr by noterate range, NoteRate variable
+    # df_tba_ = df_tba_[(df_tba_['Coupon'] >= row['NoteRate'] - 0.25 - service_fee) &
+    #                 (df_tba_['Coupon'] <= row['NoteRate'] + 0.25 - service_fee)] 
+    df_tba_ = df_tba_.loc[(df_tba_['Coupon'] >= row['NoteRate'] - 0.25 - service_fee) &
+                    (df_tba_['Coupon'] <= row['NoteRate'] + 0.25 - service_fee), :]
+
+    # just average the coupons to calculate value 
+    value_note_rate = df_tba_['PX_Last'].mean()
+    return value_note_rate
+
+
+
+
 #%%
+# * main function
 
 if __name__ == '__main__':
 
@@ -257,19 +345,25 @@ if __name__ == '__main__':
     # choosing note rate range
     noterate_range = noterange_list[0]
     # building path 
+    filename_timeseries_all = f'{auction_filename}_mat{maturity}_loan{loantype}_timeseries_'
     filename_timeseries = f'{auction_filename}_mat{maturity}_loan{loantype}_timeseries_nr_{noterate_range[0]}_{noterate_range[1]}'
 
     print('Note rate range: ', noterate_range)
 
     df_ts = read_data(file = filename_timeseries, path = auction_data_folder)
-
+    df_ts_all = read_data(file = filename_timeseries_all, path = auction_data_folder)
+    
     # %%
     df_ts.columns
 
     # %%
+    df_ts_all.columns
+    # %%
     # ts = filter_bins_rates(df_ts, min_rate = 3, max_rate = 3.75)
     ts = tide_auction_data(df_ts)
+    ts_all = tide_auction_data(df_ts_all, noterate_range= noterate_range)
     ts.head()
+
     # %%
 
     # * bloomberg data
@@ -287,6 +381,13 @@ if __name__ == '__main__':
     # 5 Coupons in range:  [3.5 4.  4.5]
     #! Alternative pick one note rate 
 
+
+    # %%
+    df_tba = build_values_note_rate_from_TBA(df_tba = df_bl_2020,
+                                    df_noterate_timeseries = ts_all,
+                                    noterate_range = noterate_range)
+    
+    df_tba.head()
 
     # %%
     # ******** Plots ******** #
@@ -321,7 +422,7 @@ if __name__ == '__main__':
     
     # %%
     # * mean (w if weighted)
-    var = 'w_winner_bid_mean'
+    var = 'w_winner_bid_mean'    # df_tba df_bl_2020
     # add bloomberg
     f, a = plot(df_bl_2020, var = 'PX_Last', maturity = maturity, initial_stat = "",  color = 'tab:orange', legend=True, legendlabel = 'Bloomberg', save=False)
     f, a = plot(ts, var, maturity, initial_stat = "Mean", fig = f, ax = a, color = 'tab:blue', legend=True, legendlabel = 'OB', save=True)
@@ -329,7 +430,7 @@ if __name__ == '__main__':
     # %%
     # * median 
     var = 'winner_bid_median'
-    f, a = plot(df_bl_2020, var = 'PX_Last', maturity = maturity, initial_stat = "",  color = 'tab:orange', legend=True, legendlabel = 'Bloomberg', save=False)
+    f, a = plot(df_tba, var = 'PX_Last', maturity = maturity, initial_stat = "",  color = 'tab:orange', legend=True, legendlabel = 'Bloomberg', save=False)
     plot(ts, var, maturity, initial_stat = "Median", fig = f, ax = a, color = 'tab:blue', legend=True, legendlabel = 'OB', save=True)
     
     # %%
@@ -415,6 +516,7 @@ if __name__ == '__main__':
     # dates range see
     df['CommittedDate'].describe()
     # %%
+    # * bids distribution
     # plot distribution of bids , var is Price, soft color, transparecy , no vertical line, bo bakground vertical lines
     df['Price'].hist(bins=40, color = 'tab:blue', alpha = 0.5, edgecolor='black', linewidth=1.2, grid=False)
     plt.xlabel('Price')
@@ -453,6 +555,16 @@ if __name__ == '__main__':
     table2 = create_table_stats(df2, additional_name='mar-apr',
                                 stats = ['count', 'mean', 'std', 'min', 'max'])
     table2
+
+
+    # * Note Rate distribution
+    # plot distribution of bids , var is Price, soft color, transparecy , no vertical line, bo bakground vertical lines
+    df['NoteRate'].hist(bins=40, color = 'tab:blue', alpha = 0.5, edgecolor='black', linewidth=1.2, grid=False)
+    plt.xlabel("Note rate")
+    plt.ylabel('Frequency')
+    plt.title('Distribution of note rates')
+    plt.savefig(f'{auction_save_folder}/distribution_of_noterates.png', dpi=300)
+
     # * end of main
 
 
