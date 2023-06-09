@@ -441,8 +441,9 @@ if __name__ == '__main__':
     f, a = plot(ts, 'winner_bid_max', maturity, initial_stat = "Min/Max", fig = f, ax = a, color = 'tab:orange', legend=True, legendlabel = 'Max')
     
     # %%
+    # ? Note : Use  ts, and df_tba when larger aggregation is needed
     # * mean (w if weighted)
-    var = 'w_winner_bid_mean'    # df_tba df_bl_2020
+    var = 'w_winner_bid_mean'    # df_tba df_bl_2020_ts ts_all_agg ts 
     # add bloomberg
     f, a = plot(df_bl_2020_ts, var = 'PX_Last', maturity = maturity, initial_stat = "",  color = 'tab:orange', legend=True, legendlabel = 'Bloomberg', save=False)
     f, a = plot(ts_all_agg, var, maturity, initial_stat = "Mean", fig = f, ax = a, color = 'tab:blue', legend=True, legendlabel = 'OB', save=True)
@@ -450,7 +451,7 @@ if __name__ == '__main__':
     # %%
     # * median 
     var = 'winner_bid_median'
-    f, a = plot(df_tba, var = 'PX_Last', maturity = maturity, initial_stat = "",  color = 'tab:orange', legend=True, legendlabel = 'Bloomberg', save=False)
+    f, a = plot(df_bl_2020_ts, var = 'PX_Last', maturity = maturity, initial_stat = "",  color = 'tab:orange', legend=True, legendlabel = 'Bloomberg', save=False)
     plot(ts_all_agg, var, maturity, initial_stat = "Median", fig = f, ax = a, color = 'tab:blue', legend=True, legendlabel = 'OB', save=True)
     
     # %%
