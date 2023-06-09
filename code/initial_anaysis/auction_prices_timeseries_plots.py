@@ -86,8 +86,10 @@ def tide_auction_data(df,
     # rename to Trading_Date to plot with the TBA data
     df = df.rename(columns = {'CommittedDate': 'Trading_Date'})
 
-    # if count < 1 delete, so small number of observations do not create additional noise. 
-    df = df[df['winner_bid_count'] >= min_daily_count]
+    # if count < 1 delete, so small number of observations do not create additional noise.
+    if 'NoteRate' in df.columns:
+        df = df[df['winner_bid_count'] >= 1]
+    else : df = df[df['winner_bid_count'] >= min_daily_count]
 
     # NoteRate range if NoteRate is a column 
     if 'NoteRate' in df.columns:
@@ -100,7 +102,8 @@ def tide_auction_data(df,
 def tide_collapse_bloomberg_data(df_, noterate_range,
                                 min_date = '2020-01-01', max_date = '2021-12-31', #'2020-05-01'
                                 tickers = ['FNCL', 'FGLMC'],
-                                service_fee = 0.75
+                                service_fee = 0.75,
+                                group_by = ['Trading_Date', 'Coupon']
                                 ):
     """
     Receives bloomberg data daily cleaned and returns cleaner time series data ready to be used in plot function.
@@ -119,7 +122,7 @@ def tide_collapse_bloomberg_data(df_, noterate_range,
     # # ? ticker FNCL and maybe FGLMC
     df = df[df['Ticker'].isin(tickers)]
     # group by to get one price PX_Last, per day, coupon (avg across months forwards and ticker )
-    df = df.groupby(['Trading_Date', 'Coupon']).agg({'PX_Last': 'mean'}).reset_index()
+    df = df.groupby(group_by).agg({'PX_Last': 'mean'}).reset_index()
 
     print("Number of observations: ", df.shape[0])
 
@@ -141,24 +144,23 @@ def collapse_note_rates(df, list_bins):
 def filter_bins_rates(df, min_rate, max_rate):
     """
     This function filters the dataframe by min note rate and max note rate.
-    # ! This function is depracated. Funtionality in auction_prices_analysis.py. 
     """
 
     df = df[(df['NoteRate'] >= min_rate) & (df['NoteRate'] <= max_rate)]
 
-    df['total_loan_amount_day'] = df.groupby(['CommittedDate'])['LoanAmount_sum'].transform('sum')
+    # df['total_loan_amount_day'] = df.groupby(['CommittedDate'])['LoanAmount_sum'].transform('sum')
 
     # colllapse by day weighting by LoanAmount_sum
-    vars = ['w_winner_bid_mean',
-            # 'winner_bid_median', 
-            # 'winner_bid_std',
-            # 'winner_bid_coeff_var', 'winner_bid_p90_p10' 
-            ]
-    for var in vars:
-        df[var] = df[var] * df['LoanAmount_sum']/ df['total_loan_amount_day']
+    # vars = ['w_winner_bid_mean',
+    #         # 'winner_bid_median', 
+    #         # 'winner_bid_std',
+    #         # 'winner_bid_coeff_var', 'winner_bid_p90_p10' 
+    #         ]
+    # for var in vars:
+    #     df[var] = df[var] * df['LoanAmount_sum']/ df['total_loan_amount_day']
 
     # collapse by day
-    df = df.groupby(['CommittedDate']).agg({'w_winner_bid_mean': 'mean', 
+    df = df.groupby(['Trading_Date']).agg({'w_winner_bid_mean': 'mean', 
                                             'winner_bid_median': 'mean',
                                             'winner_bid_std': 'mean',
                                             'winner_bid_coeff_var': 'mean',
@@ -166,7 +168,7 @@ def filter_bins_rates(df, min_rate, max_rate):
     }).reset_index()
 
     # column names 
-    df.columns = ['CommittedDate', 
+    df.columns = ['Trading_Date', 
                   'w_winner_bid_mean', 
                   'winner_bid_median', 
                   'winner_bid_std', 
@@ -271,10 +273,12 @@ def build_values_note_rate_from_TBA(df_tba,
     df_noterate_timeseries.loc[:, 'value_note_rate'] = df_noterate_timeseries.apply(
                                             lambda x: compute_note_rate_value(x, df_tba),
                                             axis = 1)
-    
-    
+
+
+    #! for now eliminate the nan values that are days in which there are no reported TBA prices
+    df_noterate_timeseries = df_noterate_timeseries.dropna(subset = ['value_note_rate'])
+
     # collapse all values by mean weighting by LoanAmount_sum by Trading_Date
-    # create loan amount sum by Trading_Date, sums across NoteRate
     df_noterate_timeseries.loc[:,'LoanAmount_sum_tot'] = df_noterate_timeseries.groupby('Trading_Date')['LoanAmount_sum'].transform('sum')
     df_noterate_timeseries['weight'] = df_noterate_timeseries['LoanAmount_sum'] / df_noterate_timeseries['LoanAmount_sum_tot']
     df_noterate_timeseries['w_value_note_rate'] = df_noterate_timeseries['value_note_rate'] * df_noterate_timeseries['weight']
@@ -319,11 +323,15 @@ def compute_note_rate_value(row, df_tba, service_fee = 0.75):
     df_tba_ = df_tba.loc[df_tba['Trading_Date'] == row['Trading_Date'], :]
 
     # filter df_nr by noterate range, NoteRate variable
-    # df_tba_ = df_tba_[(df_tba_['Coupon'] >= row['NoteRate'] - 0.25 - service_fee) &
-    #                 (df_tba_['Coupon'] <= row['NoteRate'] + 0.25 - service_fee)] 
-    df_tba_ = df_tba_.loc[(df_tba_['Coupon'] >= row['NoteRate'] - 0.25 - service_fee) &
-                    (df_tba_['Coupon'] <= row['NoteRate'] + 0.25 - service_fee), :]
+    df_tba_ = df_tba_[(df_tba_['Coupon'] >= row['NoteRate'] - 0.25 - service_fee) &
+                    (df_tba_['Coupon'] <= row['NoteRate'] + 0.25 - service_fee)] 
+    # df_tba_ = df_tba_.loc[(df_tba_['Coupon'] >= row['NoteRate'] - 0.25 - service_fee) &
+    #                 (df_tba_['Coupon'] <= row['NoteRate'] + 0.25 - service_fee), :]
 
+    if df_tba_.empty:
+        # if empty return nan
+        # print('empty', row['Trading_Date'], row['NoteRate'])
+        value_note_rate = np.nan
     # just average the coupons to calculate value 
     value_note_rate = df_tba_['PX_Last'].mean()
     return value_note_rate
@@ -343,7 +351,7 @@ if __name__ == '__main__':
     # * auction OB data
 
     # choosing note rate range
-    noterate_range = noterange_list[0]
+    noterate_range = noterange_list[5]
     # building path 
     filename_timeseries_all = f'{auction_filename}_mat{maturity}_loan{loantype}_timeseries_'
     filename_timeseries = f'{auction_filename}_mat{maturity}_loan{loantype}_timeseries_nr_{noterate_range[0]}_{noterate_range[1]}'
@@ -363,7 +371,8 @@ if __name__ == '__main__':
     ts = tide_auction_data(df_ts)
     ts_all = tide_auction_data(df_ts_all, noterate_range= noterate_range)
     ts.head()
-
+    # %%
+    ts_all_agg = filter_bins_rates(ts_all, min_rate = noterate_range[0], max_rate = noterate_range[1])
     # %%
 
     # * bloomberg data
@@ -379,7 +388,8 @@ if __name__ == '__main__':
     # 0 Coupons in range:  [2.5 3.  3.5 4.  4.5 5.  5.5 6.  6.5]
     # 3 [2.5 3.  3.5]
     # 5 Coupons in range:  [3.5 4.  4.5]
-    #! Alternative pick one note rate 
+    
+    df_bl_2020_ts = tide_collapse_bloomberg_data(df_bl, noterate_range= noterate_range, group_by=['Trading_Date'])
 
 
     # %%
@@ -388,6 +398,16 @@ if __name__ == '__main__':
                                     noterate_range = noterate_range)
     
     df_tba.head()
+    # %%
+
+    df_tba.value_note_rate.describe()
+    # %%
+    # counut nan
+    df_tba.value_note_rate.isna().sum()
+
+
+    # %%
+    
 
     # %%
     # ******** Plots ******** #
@@ -424,14 +444,14 @@ if __name__ == '__main__':
     # * mean (w if weighted)
     var = 'w_winner_bid_mean'    # df_tba df_bl_2020
     # add bloomberg
-    f, a = plot(df_bl_2020, var = 'PX_Last', maturity = maturity, initial_stat = "",  color = 'tab:orange', legend=True, legendlabel = 'Bloomberg', save=False)
-    f, a = plot(ts, var, maturity, initial_stat = "Mean", fig = f, ax = a, color = 'tab:blue', legend=True, legendlabel = 'OB', save=True)
+    f, a = plot(df_bl_2020_ts, var = 'PX_Last', maturity = maturity, initial_stat = "",  color = 'tab:orange', legend=True, legendlabel = 'Bloomberg', save=False)
+    f, a = plot(ts_all_agg, var, maturity, initial_stat = "Mean", fig = f, ax = a, color = 'tab:blue', legend=True, legendlabel = 'OB', save=True)
 
     # %%
     # * median 
     var = 'winner_bid_median'
     f, a = plot(df_tba, var = 'PX_Last', maturity = maturity, initial_stat = "",  color = 'tab:orange', legend=True, legendlabel = 'Bloomberg', save=False)
-    plot(ts, var, maturity, initial_stat = "Median", fig = f, ax = a, color = 'tab:blue', legend=True, legendlabel = 'OB', save=True)
+    plot(ts_all_agg, var, maturity, initial_stat = "Median", fig = f, ax = a, color = 'tab:blue', legend=True, legendlabel = 'OB', save=True)
     
     # %%
     # * days to auction
