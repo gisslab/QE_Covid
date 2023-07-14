@@ -35,7 +35,8 @@ auction_filename = 'combined_auctions_jan2018-jul2022_cleaned'
 
 relevant_vars =  [
        'Auction ID', 
-        #'HedgeClientKey', 'HedgeLoanKey', 
+       'HedgeClientKey',
+        #'HedgeLoanKey', 
         #'MonthlyIncome',
        #'CountyName', 
        'BorrowerClosingDate', 
@@ -123,13 +124,18 @@ stats_auction = [
                 ]
 """ Statistics to be calculated for the auction data."""
 
+def winsorize_series(s, lower, upper):
+   clipped = s.clip(lower=s.quantile(lower), upper=s.quantile(upper), axis=1)
+   return clipped
+""" Function to winsorize a series between two quantiles."""
+
 #%%
 # * main functions
 
 
 def read_data():
     """
-    This function reads the data from the auction data folder and returns a dataframe.
+    Reads the data from the auction data folder and returns a dataframe.
     """
 
     filepath = f'{auction_save_folder}/{auction_filename}.csv'
@@ -145,10 +151,10 @@ def read_data():
 
 def clean_data(df):
     """
-    This function filters the data to relevant variables, dates and product type, save and returns a dataframe.
+    Filters the data to relevant variables, dates and product type, save and returns a dataframe.
     """
 
-    df = df[relevant_vars]
+    df = df.loc[:, relevant_vars]
 
     # create maturity variable = x if "x Yr" in Product Type
     df['Maturity'] = df['ProductType'].str.extract('(\d+) Yr', expand=False).copy() #.astype(int)
@@ -171,9 +177,12 @@ def clean_data(df):
     # convert loan ammount to thousands
     df['LoanAmount'] = df['LoanAmount']/1000
 
-    # create winner investor id per auction_id 
+    # create winner investor id per auction_id  #! Winner is highest bid not the investor got the loan
     df['WinnerHedgeInvestorKey'] = df[df['Overall Rank'] == 1]['HedgeInvestorKey']
     df['WinnerHedgeInvestorKey'] = df.groupby(['Auction ID']).transform('max')['WinnerHedgeInvestorKey']
+
+    # create price of commited investor
+    df['CommittedPrice'] = df[df['CommittedInvestorKey'] == df['HedgeInvestorKey']]['Price']
     
     # * probability sell
     # when investor key = commited key, means that sells to that bidder, create variable dummy sell
@@ -185,10 +194,17 @@ def clean_data(df):
     # when well to highest bid, winner WinnerHedgeInvestorKey
     df['dummy_sell_winner'] = np.where(df['WinnerHedgeInvestorKey'] == df['CommittedInvestorKey'], 1, 0)
 
+    #
+    df['dummy_committedseller'] = np.where(df['CommittedInvestorKey'] == df['HedgeClientKey'],1,0)
+
     # create sold to Fannie, Freddie, Ginnie
     df['sold_FannieBid'] = df['CommittedInvestorKey'] == 17
     df['sold_FreddieBid'] = df['CommittedInvestorKey'].isin([22,23])
     df['sold_GinnieBid'] = df['CommittedInvestorKey'] == 51
+
+    # sold any GSE
+    df['sold_GSE'] = np.where(df['sold_FannieBid'] | df['sold_FreddieBid'] | df['sold_GinnieBid'], 1, 0)
+    # assuming always CommitedInvestorKey bid and is one of the GSEs 
 
     # bulk bidders percentage
     df['bulk_bidders_fraction'] = df['Number of Bulk Bidders']/df['Number of Participants']
@@ -206,13 +222,15 @@ def clean_data(df):
 
 def create_measures_collapse(df):
     """
-    This function creates bid measures like min, max, mean, median from the setting variable
-    stats_auction, std; saves and returns a dataframe.
+    Creates bid metrics like min, max, mean, median from the setting variable
+    stats_auction, std; saves and returns a collapsed dataframe at the loan/auction level.
     """
     
     df = df.groupby(['Auction ID']).agg({'Price': stats_auction,
+                                        'CommittedPrice': 'first',
                                         'CommittedInvestorKey': 'first',
                                         'WinnerHedgeInvestorKey': 'first',
+                                        'HedgeClientKey' : 'first', #! check this
                                         'CommittedDate': 'first',
                                         'BorrowerClosingDate': 'first',
                                         'DaysToAuction': 'first',
@@ -233,6 +251,7 @@ def create_measures_collapse(df):
                                         'sold_FannieBid': 'first',
                                         'sold_FreddieBid': 'first',
                                         'sold_GinnieBid': 'first',
+                                        'sold_GSE': 'first',
                                         'bulk_bidders_fraction': 'first',
                                         }).reset_index()
 
@@ -252,31 +271,54 @@ def create_measures_collapse(df):
     return df
 
 
-def to_time_series(df, bynote=False, add_name = ''):
+def to_time_series(df, bynote=False, add_name = '', monthly=False):
     """
-    This function creates a time series dataframe from the auction level dataframe.
+    Creates a time series dataframe from the auction level dataframe.
     """
 
+    if monthly:
+        # create month variable
+        df['CommittedMonth'] = df['CommittedDate'].dt.to_period('M')
+        print(df['CommittedMonth'].unique())
+        group = ['CommittedMonth', 'NoteRate'] if bynote else ['CommittedDate_month']
+        var_time = 'CommittedMonth'
+    else: 
+        group = ['CommittedDate', 'NoteRate'] if bynote else ['CommittedDate']
+        var_time = 'CommittedDate'
+
     # loan amount group and transform by day and noterate
-    df['loan_amount_day'] = df.groupby(['CommittedDate'])['LoanAmount'].transform('sum')
-    df['loan_amount_day_noterate'] = df.groupby(['CommittedDate', 'NoteRate'])['LoanAmount'].transform('sum')
-    
+    df['loan_amount_time'] = df.groupby([var_time])['LoanAmount'].transform('sum')
+    df['loan_amount_time_noterate'] = df.groupby([var_time, 'NoteRate'])['LoanAmount'].transform('sum')
 
     # all price variables
     vars_iter = [var for var in df.columns if 'Price' in var]
-    total_weight = "loan_amount_day_noterate" if bynote else "loan_amount_day"
+    total_weight = "loan_amount_time_noterate" if bynote else "loan_amount_time"
     # create weighted price variables by loan amount by day and noterate
     df['loan_weight'] = df['LoanAmount'] / df[total_weight]
 
     for var in vars_iter:
+        print(var)
         df[f"{var}_weighted"] = df[var] * df['loan_weight']
 
     stats_max_price = stats_auction
-    group = ['CommittedDate', 'NoteRate'] if bynote else ['CommittedDate']
+        
+
+    # Winsorizing continuous variables at 0.1% and 99.9% levels (to avoid outliers)
+    #? Question: Winsorized by month or all data? - all data
+    #? Question: winsorized loans size as well? - YES
+    wind_list = ['Price', 'CommittedPrice', 
+                 'Price_weighted', 'CommittedPrice_weighted', 
+                 'LoanAmount']
+
+    for f in wind_list:
+        df[f] = winsorize_series(df[f], 0.001, 0.999) # but this does not clipped the entire distribution, only the tails
+    
 
     df = df.groupby(group).agg({
                                 'Price_weighted': 'sum', # max,
                                 'Price': stats_max_price,
+                                'CommittedPrice': 'first',
+                                'CommittedPrice_weighted': 'sum', # accepted price
                                 'Auction ID': 'count',
                                 'BorrowerClosingDate': 'first',
                                 'DaysToAuction': 'mean',
@@ -297,6 +339,7 @@ def to_time_series(df, bynote=False, add_name = ''):
                                 'sold_FannieBid': 'mean',
                                 'sold_FreddieBid': 'mean',
                                 'sold_GinnieBid': 'mean',
+                                'sold_GSE': 'mean',
                                 'bulk_bidders_fraction': 'mean',
                                 # 'loan_weight' : 'sum'
                                 }).reset_index()
@@ -342,11 +385,27 @@ if __name__ == '__main__':
     # %%
     df1 = clean_data(df)
     # %%
-    df1[['Auction ID','CommittedInvestorKey', 'HedgeInvestorKey',  'WinnerHedgeInvestorKey','dummy_sell', 'dummy_sell_any', 'dummy_sell_winner', 'Number of Participants']].head(25)
+    df1[['Auction ID','CommittedInvestorKey', 'HedgeInvestorKey',  'WinnerHedgeInvestorKey','HedgeClientKey',
+        'Price']].head(25)
 
     # %%
+    df1[['Auction ID','CommittedInvestorKey', 'HedgeInvestorKey',  'WinnerHedgeInvestorKey',
+         'dummy_sell', 'dummy_sell_any', 'dummy_sell_winner', 'Number of Participants']].head(25)
+
+    # %%
+    # print only where dummy_sell_any is 0
+    df1[df1['dummy_sell_any']==0][
+        ['Auction ID','CommittedInvestorKey', 'HedgeInvestorKey', 'HedgeClientKey', 'WinnerHedgeInvestorKey',
+         'Price','sold_GSE']].head(45)
+    #? Who is investor 65, accepts and it is not a GSE?
+    # %%
     df1[['Auction ID','CommittedInvestorKey', 'HedgeInvestorKey', 'Number of Participants', 'Number of Bulk Bidders','bulk_bidders_fraction' ]].head(25)
-    
+
+    # %%   
+    cols = ['Auction ID','CommittedInvestorKey', 'HedgeInvestorKey', 'HedgeClientKey', 'WinnerHedgeInvestorKey',
+         'Price','sold_GSE']
+    # CommittedInvestorKey == HedgeClientKey
+    df1[df1[df1.dummy_committedseller == 1]][cols].head(25)
     # %%
     df_auc = create_measures_collapse(df1)
 
@@ -354,11 +413,13 @@ if __name__ == '__main__':
     df_auc.columns
 
     # %%
-
     df_auc[['Auction ID','dummy_sell_any','dummy_sell_winner', 'sold_FannieBid', 'sold_FreddieBid', 'sold_GinnieBid' ]].describe()
 
     # %%
-    df_time_series = to_time_series(df_auc, bynote=True)
+    df_auc[['Auction ID','CommittedInvestorKey', 'WinnerHedgeInvestorKey', 'CommittedPrice','Price' ]].describe()
+
+    # %%
+    df_time_series = to_time_series(df_auc, bynote=True, monthly=False)
 
     # %%
 
