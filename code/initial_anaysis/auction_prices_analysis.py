@@ -125,8 +125,16 @@ stats_auction = [
 """ Statistics to be calculated for the auction data."""
 
 def winsorize_series(s, lower, upper):
-   clipped = s.clip(lower=s.quantile(lower), upper=s.quantile(upper), axis=1)
-   return clipped
+#    clipped = s.clip(lower=s.quantile(lower), upper=s.quantile(upper), axis=1)
+    quantiles = s.quantile([lower, upper])
+    q_l = quantiles.loc[lower]
+    q_u = quantiles.loc[upper]
+
+    out = np.where(s.values <= q_l,q_l, 
+                                      np.where(s >= q_u, q_u, s)
+                  )
+
+    return out
 """ Function to winsorize a series between two quantiles."""
 
 #%%
@@ -275,7 +283,8 @@ def to_time_series(df, bynote=False, add_name = '', monthly=False):
     """
     Creates a time series dataframe from the auction level dataframe.
     """
-
+    df = df.copy()
+    
     if monthly:
         # create month variable
         df['CommittedMonth'] = df['CommittedDate'].dt.to_period('M')
@@ -311,6 +320,7 @@ def to_time_series(df, bynote=False, add_name = '', monthly=False):
                  'LoanAmount']
 
     for f in wind_list:
+        print("Windsorized: " , f)
         df[f] = winsorize_series(df[f], 0.001, 0.999) # but this does not clipped the entire distribution, only the tails
     
 
@@ -332,7 +342,7 @@ def to_time_series(df, bynote=False, add_name = '', monthly=False):
                                 'i_FreddieBid': 'mean',
                                 # 'i_GinnieBid': 'first',
                                 'LoanAmount': ['mean', 'sum'],
-                                'loan_amount_day': 'first',
+                                'loan_amount_time': 'first',
                                 'ProductType': 'first',
                                 'dummy_sell_any': 'mean',
                                 'dummy_sell_winner': 'mean',
@@ -405,7 +415,13 @@ if __name__ == '__main__':
     cols = ['Auction ID','CommittedInvestorKey', 'HedgeInvestorKey', 'HedgeClientKey', 'WinnerHedgeInvestorKey',
          'Price','sold_GSE']
     # CommittedInvestorKey == HedgeClientKey
-    df1[df1[df1.dummy_committedseller == 1]][cols].head(25)
+    df1[df1.dummy_committedseller == 1][cols].describe()
+
+    # %%   
+    cols_describe = ['dummy_committedseller', 'dummy_sell_any', 'dummy_sell_winner', 'sold_GSE']
+    df1[cols_describe].describe()
+    # only means
+    df1[cols_describe].mean()
     # %%
     df_auc = create_measures_collapse(df1)
 
@@ -417,6 +433,10 @@ if __name__ == '__main__':
 
     # %%
     df_auc[['Auction ID','CommittedInvestorKey', 'WinnerHedgeInvestorKey', 'CommittedPrice','Price' ]].describe()
+
+    # %%
+    print(df_auc['Price'].mean(), "number of elements: ", df_auc['Price'].shape[0])
+    winsorize_series(df_auc['Price'], 0.05, 0.95).mean()
 
     # %%
     df_time_series = to_time_series(df_auc, bynote=True, monthly=False)
