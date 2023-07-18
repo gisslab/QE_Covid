@@ -137,4 +137,44 @@ df_bl_2020 = df_bl[df_bl['Trading_Date'].dt.year == 2020]
 df_bl_2020.Ticker.value_counts()
 # %%
 df_bl_2020.Forward_Trading_Months.value_counts()
+
+
+
+
+
+
+# %%
+
+### * Ob hmda merge file test* ###
+
+ob_hmda_folder = '/project/houde/mortgages/QE_Covid/data/data_auction/clean_data/hmda-ob-mbs_master_crosswalk_apr2023.dta'
+
+df_ob_hmda = pd.read_stata(ob_hmda_folder)
+
+# %%
+df_ob_hmda.info()
+
+# %%
+df_ob_hmda.head(30)
+
+# %%
+df_ob_hmda.columns
+
+# %%
+df_ob_hmda.describe()
+
+# %%
+# * larger dataset test * #
+# /project/houde/mortgages/QE_Covid/data/data_auction/clean_data/hmda-ob-mbs_origination_data_apr2023.dta
+
+ob_hmda_orig_folder = '/project/houde/mortgages/QE_Covid/data/data_auction/clean_data/hmda-ob-mbs_origination_data_apr2023.dta'
+
+df_ob_hmda_orig = pd.read_stata(ob_hmda_orig_folder)
+
+# %%
+df_ob_hmda_orig.info()
+
+# %%
+df_ob_hmda_orig.head(30)
+
 # %%

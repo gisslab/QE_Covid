@@ -247,10 +247,10 @@ def create_measures_collapse(df):
                                         'Number of Participants' : 'first',
                                         'FannieBid': 'max',
                                         'FreddieBid': 'max',
-                                        # 'GinnieBid': 'first',
+                                        'GinnieBid': 'first',
                                         'i_FannieBid': 'max',
                                         'i_FreddieBid': 'max',
-                                        # 'i_GinnieBid': 'first',
+                                        'i_GinnieBid': 'first',
                                         'NoteRate': 'first',
                                         'LoanAmount': 'first',
                                         'ProductType': 'first',
@@ -321,7 +321,7 @@ def to_time_series(df, bynote=False, add_name = '', monthly=False):
 
     for f in wind_list:
         print("Windsorized: " , f)
-        df[f] = winsorize_series(df[f], 0.001, 0.999) # but this does not clipped the entire distribution, only the tails
+        df[f] = winsorize_series(df[f], 0.001, 0.999) 
     
 
     df = df.groupby(group).agg({
@@ -374,7 +374,10 @@ def to_time_series(df, bynote=False, add_name = '', monthly=False):
     # print("Column names: ", df.columns)
 
     # save data
-    df.to_csv(f'{auction_save_folder}/{auction_filename}_mat{maturity}_loan{loantype}_timeseries_{add_name}.csv', sep='|', index=False)
+    filename = f'{auction_save_folder}/{auction_filename}_mat{maturity}_loan{loantype}_timeseries_{add_name}.csv'
+    print("Saving data to: ", filename)
+    df.to_csv(filename , sep='|', index=False)
+
     return df
 
 
@@ -426,6 +429,10 @@ if __name__ == '__main__':
     df_auc = create_measures_collapse(df1)
 
     # %%
+    # read data
+    df_auc = pd.read_csv(f'{auction_save_folder}/{auction_filename}_mat{maturity}_loan{loantype}_timeseries_something.csv', sep='|')
+
+    # %%
     df_auc.columns
 
     # %%
@@ -451,6 +458,18 @@ if __name__ == '__main__':
         df_auc_1 = df_auc[ (df_auc['NoteRate'] >= min_nr) & (df_auc['NoteRate'] <= max_nr)].copy()
         df_time_series_1 = to_time_series(df_auc_1, bynote=False, add_name= f'nr_{min_nr}_{max_nr}')
 
+    # %%
+    # * Separate cash windows (GSE bid accepted) and auction transactions (non GSE investors bid accepted)
+    # ? Questions is what to do when non GSE key bid appears as the buyer (Committed) but it is not one of the bids. 
+
+    cash_windows = df_auc[df_auc['sold_GSE'] == 1].copy() 
+    # ? sold GSE are where Committed is GSE (does not have to be in the bids), is this right?
+
+
+    # %%
+    auction_trans = df_auc[(df_auc['sold_GSE'] == 0) & df_auc['dummy_sell_any']==1].copy()
+    # ? Maybe not need to remove transactions where the buyer is not one of the bidders. 
+    # ? option is to only remove where the buyer is not the seller (Commited and HedgeClientKey are different)
 
     # %%
     df_time_series_1[['w_winner_bid_mean', 'winner_bid_mean']].head(30)
