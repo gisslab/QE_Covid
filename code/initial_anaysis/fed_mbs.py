@@ -125,7 +125,7 @@ if __name__ == '__main__':
 
 
     # %%
-    # daily graph of purchases by coupon, totalamounttransferredinmillions, price
+    # * daily graph of purchases by coupon, totalamounttransferredinmillions, price
     # add ylabels
 
     g = df.groupby(['tradedate', 'couponinpercent'])[
@@ -142,7 +142,7 @@ if __name__ == '__main__':
     g.figure.savefig(f'{auction_save_folder}/figures/{agency}_daily_purchases_tradedate_price.png')
 
     # %%
-    # daily graph of purchases by coupon, totalamounttransferredinmillions, price
+    # * daily graph of purchases by coupon, totalamounttransferredinmillions, price
 
     g = df.groupby(['contractualsettlementdate', 'couponinpercent'])[
                     'totalamounttransferredinmillions'].sum().unstack().plot()

@@ -237,9 +237,9 @@ def clean_data(df):
     df['dummy_committedseller'] = np.where(df['CommittedInvestorKey'] == df['HedgeClientKey'],1,0)
 
     # create sold to Fannie, Freddie, Ginnie
-    df['sold_FannieBid'] = df['CommittedInvestorKey'] == 17
-    df['sold_FreddieBid'] = df['CommittedInvestorKey'].isin([22,23])
-    df['sold_GinnieBid'] = df['CommittedInvestorKey'] == 51
+    df['sold_FannieBid'] = np.where(df['CommittedInvestorKey'] == 17,1,0)
+    df['sold_FreddieBid'] = np.where(df['CommittedInvestorKey'].isin([22,23]), 1, 0)
+    df['sold_GinnieBid'] = np.where(df['CommittedInvestorKey'] == 51, 1, 0)
 
     # sold any GSE
     df['sold_GSE'] = np.where(df['sold_FannieBid'] | df['sold_FreddieBid'] | df['sold_GinnieBid'], 1, 0)
@@ -287,6 +287,7 @@ def create_measures_collapse(df):
                                         'ProductType': 'first',
                                         'dummy_sell_any': 'first',
                                         'dummy_sell_winner': 'first',
+                                        'dummy_committedseller': 'first',
                                         'sold_FannieBid': 'first',
                                         'sold_FreddieBid': 'first',
                                         'sold_GinnieBid': 'first',
@@ -380,6 +381,7 @@ def to_time_series(df, bynote=False, add_name = '', monthly=False):
                                 'ProductType': 'first',
                                 'dummy_sell_any': 'mean',
                                 'dummy_sell_winner': 'mean',
+                                'dummy_committedseller': 'mean',
                                 'sold_FannieBid': 'mean',
                                 'sold_FreddieBid': 'mean',
                                 'sold_GinnieBid': 'mean',
@@ -491,19 +493,39 @@ if __name__ == '__main__':
     df_auc = create_measures_collapse(df1)
 
     # %%
-    # read data
+    # ***************** read data at auction level *****************
+
     df_auc = pd.read_csv(f'{auction_save_folder}/{auction_filename}_mat{maturity}_loan{loantype}_auction_level.csv', sep='|')
 
     # %%
     df_auc.columns
 
     # %%
-    df_auc[['Auction ID','dummy_sell_any','dummy_sell_winner', 'sold_FannieBid', 'sold_FreddieBid', 'sold_GinnieBid' ]].describe()
+    cols_describe = ['dummy_committedseller', 'dummy_sell_any', 'dummy_sell_winner', 'sold_GSE', 'sold_FannieBid', 'sold_FreddieBid', 'sold_GinnieBid']
+    # df_auc[['Auction ID','dummy_sell_any','dummy_sell_winner', 'sold_FannieBid', 'sold_FreddieBid', 'sold_GinnieBid' ]].describe()
+    df_auc[cols_describe].describe()
 
     # %%
     df_auc[['Auction ID','CommittedInvestorKey', 'WinnerHedgeInvestorKey', 'CommittedPrice','Price' ]].describe()
 
     # %%
+    # * not sold to anyone stats
+    # df_auc[['Auction ID','dummy_sell_any','dummy_sell_winner', 'sold_FannieBid', 'sold_FreddieBid', 'sold_GinnieBid' ]].describe()
+    df_auc[df_auc['dummy_sell_any']==0][cols_describe].describe()
+
+    # %%
+    # * sold to anyone stats
+    df_auc[df_auc['dummy_sell_any']==1][cols_describe].describe()
+
+    # %%
+    # * case in which sold to anyone = 0 (Committed is not in bids) and sold to Winner = 1 (highest bid is Commited) -> imposible
+    #! what is 99999 ket , CommittedInvestorKey
+    auc_ID = df_auc[(df_auc['dummy_sell_any']==0) & (df_auc['dummy_sell_winner']==1)]['Auction ID'].unique()
+    df1[df1['Auction ID'].isin(auc_ID)][[
+        'Auction ID','CommittedInvestorKey', 'HedgeInvestorKey', 'HedgeClientKey', 
+        'WinnerHedgeInvestorKey','Price','dummy_sell_winner']].head(35)
+    # %%
+    # * testing winsorize
     print(df_auc['Price'].mean(), "number of elements: ", df_auc['Price'].shape[0])
     winsorize_series(df_auc['Price'], 0.05, 0.95).mean()
 
