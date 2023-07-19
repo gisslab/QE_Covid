@@ -169,12 +169,71 @@ df_ob_hmda.describe()
 
 ob_hmda_orig_folder = '/project/houde/mortgages/QE_Covid/data/data_auction/clean_data/hmda-ob-mbs_origination_data_apr2023.dta'
 
-df_ob_hmda_orig = pd.read_stata(ob_hmda_orig_folder)
+# %%
+
+# read by chunks to avoid memory error
+df_ob_hmda_orig = pd.read_stata(ob_hmda_orig_folder, chunksize=100000, convert_categoricals=False)
 
 # %%
-df_ob_hmda_orig.info()
+
+cols = ['AuctionId', 'LoanSequenceNumberEMBS', 's_coupon']
+# for each chunk keeps only where Aution_ID is not null
+df = pd.DataFrame()
+i = 0
+for chunk in df_ob_hmda_orig:
+    dfchunk = chunk[chunk['AuctionId'].notnull() & chunk['LoanSequenceNumberEMBS'].notnull()][cols]
+    df = pd.concat([df, dfchunk])
+    i += 1
+    if i == 5:
+        break
 
 # %%
-df_ob_hmda_orig.head(30)
+df.info()
+
+# %%
+df.head(30)
+# %%
+# * read only n rows
+df_ob_hmda_orig = pd.read_stata(ob_hmda_orig_folder, chunksize=100000, convert_categoricals=False)
+first_chunk = next(df_ob_hmda_orig)
+
+# %%
+first_chunk.info()
+
+# %%
+
+first_chunk.head(30)
+
+# %%
+print(first_chunk.columns[0:30])
+# %%
+print(first_chunk.columns[30:60])
+# %%
+print(first_chunk.columns[60:90])
+# %%
+print(first_chunk.columns[90:120])
+# %%
+print(first_chunk.columns[120:150])
+
+# %%
+print(first_chunk.columns[150:180])
+
+# %%
+print(first_chunk.columns[180:210])
+
+# %%
+print(first_chunk.columns[210:240])
+
+# %%
+print(first_chunk.columns[240:270])
+
+# %%
+print(first_chunk.columns[270:300])
+
+# %%
+print(first_chunk.columns[300:330])
+
+#! Note: There are columns from different data based indexed as h_ e_ o _s_ p_
+
 
 # %%

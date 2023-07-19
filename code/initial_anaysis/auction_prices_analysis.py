@@ -31,7 +31,13 @@ auction_save_folder = '/project/houde/mortgages/QE_Covid/data/data_auction/clean
 
 auction_filename = 'combined_auctions_jan2018-jul2022_cleaned'
 
+ob_hmda_orig_folder = '/project/houde/mortgages/QE_Covid/data/data_auction/clean_data/hmda-ob-mbs_origination_data_apr2023.dta'
+""" Merged file with the ob, hmda, mbs data. """
 # * settings
+
+relevant_vars_ob_hmda_mbs = ['AuctionId', 
+                             'LoanSequenceNumberEMBS', 
+                             's_coupon']
 
 relevant_vars =  [
        'Auction ID', 
@@ -82,7 +88,7 @@ relevant_vars =  [
        'Highest Bulk Bid', 
        #'Second Highest Bulk Bid', 'Highest Reserve Bid',
         #'Second Highest Reserve Bid',
-    
+        's_coupon'
        ]
 """ Relevant variables from the data."""
 
@@ -156,6 +162,31 @@ def read_data():
         print('Error reading the data: ',filepath, ", ", e)
         return None
 
+def read_get_security_characteristics():
+    """
+    Reads from the merge file the security characteristics and returns a dataframe.
+    """
+        
+        # read by chunks to avoid memory error
+    df_ob_hmda_orig = pd.read_stata(ob_hmda_orig_folder, chunksize=100000, convert_categoricals=False)
+
+    cols = relevant_vars_ob_hmda_mbs
+    # for each chunk keeps only where Aution_ID is not null
+    df = pd.DataFrame()
+    i = 0
+    for chunk in df_ob_hmda_orig:
+        dfchunk = chunk[chunk['AuctionId'].notnull() & chunk['LoanSequenceNumberEMBS'].notnull()][cols]
+        df = pd.concat([df, dfchunk])
+        i += 1
+        if i % 100 == 0:
+            print("chunk ", i)
+
+    # save the data
+    filename = 'ob_hmda_mbs_security_coupon.csv'
+    print("Saving the data to csv: ", filename)
+    df.to_csv(f'{auction_save_folder}/{filename}', index=False)
+
+    return df
 
 def clean_data(df):
     """
@@ -247,10 +278,10 @@ def create_measures_collapse(df):
                                         'Number of Participants' : 'first',
                                         'FannieBid': 'max',
                                         'FreddieBid': 'max',
-                                        'GinnieBid': 'first',
+                                        # 'GinnieBid': 'first',
                                         'i_FannieBid': 'max',
                                         'i_FreddieBid': 'max',
-                                        'i_GinnieBid': 'first',
+                                        # 'i_GinnieBid': 'first',
                                         'NoteRate': 'first',
                                         'LoanAmount': 'first',
                                         'ProductType': 'first',
@@ -261,6 +292,7 @@ def create_measures_collapse(df):
                                         'sold_GinnieBid': 'first',
                                         'sold_GSE': 'first',
                                         'bulk_bidders_fraction': 'first',
+                                        's_coupon': 'first',
                                         }).reset_index()
 
     
@@ -275,7 +307,9 @@ def create_measures_collapse(df):
     print("Column names: ", df.columns)
 
     # save data
-    df.to_csv(f'{auction_save_folder}/{auction_filename}_mat{maturity}_loan{loantype}_auction_level.csv', sep='|', index=False)
+    filename = f'{auction_save_folder}/{auction_filename}_mat{maturity}_loan{loantype}_auction_level.csv'
+    df.to_csv(filename, sep='|', index=False)
+    print("Data saved at: ", filename)
     return df
 
 
@@ -387,12 +421,40 @@ def to_time_series(df, bynote=False, add_name = '', monthly=False):
 
 if __name__ == '__main__':
 
+    # %%
+    # * saving coupon 
+
+    df_coupon = read_get_security_characteristics() 
+
+    # %%
+    filename = 'ob_hmda_mbs_security_coupon.csv'
+    df_coupon = pd.read_csv(f'{auction_save_folder}/{filename}', sep=',')
+    # %%
+    df_coupon.head()
+
+    # %%
+    df_coupon.info()
+
+    # %%
+    # * change AuctionID name for merge
+    df_coupon = df_coupon.rename(columns={'AuctionId': 'Auction ID'})
+
+    # %%
+    # %%
+
     # * Reading and processing OB data
     # %%
     df = read_data()
 
     # %%
     df.columns
+
+    # %%
+    # * merge on Auction ID
+    df = df.merge(df_coupon, on='Auction ID', how='left')
+
+    df.columns
+
 
     # %%
     # %%
@@ -430,7 +492,7 @@ if __name__ == '__main__':
 
     # %%
     # read data
-    df_auc = pd.read_csv(f'{auction_save_folder}/{auction_filename}_mat{maturity}_loan{loantype}_timeseries_something.csv', sep='|')
+    df_auc = pd.read_csv(f'{auction_save_folder}/{auction_filename}_mat{maturity}_loan{loantype}_auction_level.csv', sep='|')
 
     # %%
     df_auc.columns
