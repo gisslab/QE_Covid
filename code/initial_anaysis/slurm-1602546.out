@@ -1,0 +1,221 @@
+/project6/houde/mortgages/QE_Covid/code/initial_anaysis/auction_prices_analysis.py:437: DtypeWarning: Columns (1) have mixed types. Specify dtype option on import or set low_memory=False.
+  df_coupon = pd.read_csv(f'{auction_save_folder}/{filename}', sep=',')
+chunk  100
+chunk  200
+chunk  300
+Saving the data to csv:  ob_hmda_mbs_security_coupon.csv
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 30115338 entries, 0 to 30115337
+Data columns (total 3 columns):
+ #   Column                  Dtype  
+---  ------                  -----  
+ 0   AuctionId               object 
+ 1   LoanSequenceNumberEMBS  object 
+ 2   s_coupon                float64
+dtypes: float64(1), object(2)
+memory usage: 689.3+ MB
+Maturity
+30    16911024
+15     1815728
+20      606016
+25      199390
+10      134552
+dtype: int64
+Summary of the data:         HedgeClientKey      NoteRate  ...      sold_GSE  bulk_bidders_fraction
+count    8.390139e+06  8.390139e+06  ...  8.390139e+06           8.390139e+06
+mean     6.954858e+01  3.160029e+00  ...  4.185842e-01           6.687991e-01
+std      3.995409e+01  4.231369e-01  ...  4.933270e-01           2.996120e-01
+min      1.000000e+00  0.000000e+00  ...  0.000000e+00           0.000000e+00
+25%      3.600000e+01  2.875000e+00  ...  0.000000e+00           6.250000e-01
+50%      6.200000e+01  3.125000e+00  ...  0.000000e+00           7.647059e-01
+75%      9.500000e+01  3.375000e+00  ...  1.000000e+00           8.571429e-01
+max      2.050000e+02  6.125000e+00  ...  1.000000e+00           1.000000e+00
+
+[8 rows x 32 columns]
+Number of observations:  8390139
+Number of unique auctions:  766296
+Number of observations:  766296
+Column names:  Index(['Auction ID', 'Price_min', 'Price', 'Price_mean', 'Price_median',
+       'Price_std', 'Price_count', 'Price_coeff_var', 'Price_p90_p10',
+       'CommittedPrice', 'CommittedInvestorKey', 'WinnerHedgeInvestorKey',
+       'HedgeClientKey', 'CommittedDate', 'BorrowerClosingDate',
+       'DaysToAuction', 'Number of Enterprise Bidders',
+       'Number of Bulk Bidders', 'Number of Participants', 'FannieBid',
+       'FreddieBid', 'i_FannieBid', 'i_FreddieBid', 'NoteRate', 'LoanAmount',
+       'ProductType', 'dummy_sell_any', 'dummy_sell_winner',
+       'dummy_committedseller', 'dummy_committednan', 'sold_FannieBid',
+       'sold_FreddieBid', 'sold_GinnieBid', 'sold_GSE',
+       'bulk_bidders_fraction', 's_coupon'],
+      dtype='object')
+Data saved at:  /project/houde/mortgages/QE_Covid/data/data_auction/clean_data/combined_auctions_jan2018-jul2022_cleaned_mat30_loan1_auction_level.csv
+103.92750308049108 number of elements:  766296
+Price_min
+Price
+Price_mean
+Price_median
+Price_std
+Price_count
+Price_coeff_var
+Price_p90_p10
+CommittedPrice
+Windsorized:  Price
+Windsorized:  CommittedPrice
+Windsorized:  Price_weighted
+Windsorized:  CommittedPrice_weighted
+Windsorized:  LoanAmount
+Number of observations:  11359
+Saving data to:  /project/houde/mortgages/QE_Covid/data/data_auction/clean_data/combined_auctions_jan2018-jul2022_cleaned_mat30_loan1_timeseries_.csv
+*********  Note rates intervals  *********
+*********  1  -  7   *********
+Price_min
+Price
+Price_mean
+Price_median
+Price_std
+Price_count
+Price_coeff_var
+Price_p90_p10
+CommittedPrice
+Windsorized:  Price
+Windsorized:  CommittedPrice
+Windsorized:  Price_weighted
+Windsorized:  CommittedPrice_weighted
+Windsorized:  LoanAmount
+Number of observations:  575
+Saving data to:  /project/houde/mortgages/QE_Covid/data/data_auction/clean_data/combined_auctions_jan2018-jul2022_cleaned_mat30_loan1_timeseries_nr_1_7.csv
+*********  2  -  2.75   *********
+Price_min
+Price
+Price_mean
+Price_median
+Price_std
+Price_count
+Price_coeff_var
+Price_p90_p10
+CommittedPrice
+Windsorized:  Price
+Windsorized:  CommittedPrice
+Windsorized:  Price_weighted
+Windsorized:  CommittedPrice_weighted
+Windsorized:  LoanAmount
+Number of observations:  492
+Saving data to:  /project/houde/mortgages/QE_Covid/data/data_auction/clean_data/combined_auctions_jan2018-jul2022_cleaned_mat30_loan1_timeseries_nr_2_2.75.csv
+*********  2.75  -  3.5   *********
+Price_min
+Price
+Price_mean
+Price_median
+Price_std
+Price_count
+Price_coeff_var
+Price_p90_p10
+CommittedPrice
+Windsorized:  Price
+Windsorized:  CommittedPrice
+Windsorized:  Price_weighted
+Windsorized:  CommittedPrice_weighted
+Windsorized:  LoanAmount
+Number of observations:  567
+Saving data to:  /project/houde/mortgages/QE_Covid/data/data_auction/clean_data/combined_auctions_jan2018-jul2022_cleaned_mat30_loan1_timeseries_nr_2.75_3.5.csv
+*********  3  -  3.75   *********
+Price_min
+Price
+Price_mean
+Price_median
+Price_std
+Price_count
+Price_coeff_var
+Price_p90_p10
+CommittedPrice
+Windsorized:  Price
+Windsorized:  CommittedPrice
+Windsorized:  Price_weighted
+Windsorized:  CommittedPrice_weighted
+Windsorized:  LoanAmount
+Number of observations:  566
+Saving data to:  /project/houde/mortgages/QE_Covid/data/data_auction/clean_data/combined_auctions_jan2018-jul2022_cleaned_mat30_loan1_timeseries_nr_3_3.75.csv
+*********  3.75  -  5.25   *********
+Price_min
+Price
+Price_mean
+Price_median
+Price_std
+Price_count
+Price_coeff_var
+Price_p90_p10
+CommittedPrice
+Windsorized:  Price
+Windsorized:  CommittedPrice
+Windsorized:  Price_weighted
+Windsorized:  CommittedPrice_weighted
+Windsorized:  LoanAmount
+Number of observations:  531
+Saving data to:  /project/houde/mortgages/QE_Covid/data/data_auction/clean_data/combined_auctions_jan2018-jul2022_cleaned_mat30_loan1_timeseries_nr_3.75_5.25.csv
+*********  4  -  4.75   *********
+Price_min
+Price
+Price_mean
+Price_median
+Price_std
+Price_count
+Price_coeff_var
+Price_p90_p10
+CommittedPrice
+Windsorized:  Price
+Windsorized:  CommittedPrice
+Windsorized:  Price_weighted
+Windsorized:  CommittedPrice_weighted
+Windsorized:  LoanAmount
+Number of observations:  522
+Saving data to:  /project/houde/mortgages/QE_Covid/data/data_auction/clean_data/combined_auctions_jan2018-jul2022_cleaned_mat30_loan1_timeseries_nr_4_4.75.csv
+*********  5  -  7   *********
+Price_min
+Price
+Price_mean
+Price_median
+Price_std
+Price_count
+Price_coeff_var
+Price_p90_p10
+CommittedPrice
+Windsorized:  Price
+Windsorized:  CommittedPrice
+Windsorized:  Price_weighted
+Windsorized:  CommittedPrice_weighted
+Windsorized:  LoanAmount
+Number of observations:  400
+Saving data to:  /project/houde/mortgages/QE_Covid/data/data_auction/clean_data/combined_auctions_jan2018-jul2022_cleaned_mat30_loan1_timeseries_nr_5_7.csv
+*********  3.5  -  3.5   *********
+Price_min
+Price
+Price_mean
+Price_median
+Price_std
+Price_count
+Price_coeff_var
+Price_p90_p10
+CommittedPrice
+Windsorized:  Price
+Windsorized:  CommittedPrice
+Windsorized:  Price_weighted
+Windsorized:  CommittedPrice_weighted
+Windsorized:  LoanAmount
+Number of observations:  539
+Saving data to:  /project/houde/mortgages/QE_Covid/data/data_auction/clean_data/combined_auctions_jan2018-jul2022_cleaned_mat30_loan1_timeseries_nr_3.5_3.5.csv
+*********  4.5  -  4.5   *********
+Price_min
+Price
+Price_mean
+Price_median
+Price_std
+Price_count
+Price_coeff_var
+Price_p90_p10
+CommittedPrice
+Windsorized:  Price
+Windsorized:  CommittedPrice
+Windsorized:  Price_weighted
+Windsorized:  CommittedPrice_weighted
+Windsorized:  LoanAmount
+Number of observations:  459
+Saving data to:  /project/houde/mortgages/QE_Covid/data/data_auction/clean_data/combined_auctions_jan2018-jul2022_cleaned_mat30_loan1_timeseries_nr_4.5_4.5.csv
