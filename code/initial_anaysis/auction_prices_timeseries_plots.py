@@ -46,10 +46,6 @@ maturity = 30
 loantype = 1
 """ Type of the auctioned loans. 1 = Conforming"""
 
-noterange_list = ap.noterange_list #[(1,7),(2, 2.75), (2.75, 3.5), (3, 3.75), (3.75, 5.25),(4, 4.75), (5, 7)]
-""" List of tuples with the min and max note rates to filter the data. Index 0 is all the note rates. """
-
-
 collapsed_note_rate_list = [2.5, 3, 3.75, 4.25, 4.5,  5,  5.5,  6]
 
 #%%
@@ -77,7 +73,7 @@ def read_data(file, path, datetime_vars = ['CommittedDate', 'BorrowerClosingDate
 def tide_auction_data(df, 
                       min_date = '2020-01-01', max_date = '2021-12-31', 
                       min_daily_count = 10,
-                      noterate_range = (1,7)):
+                      interval = (1,7)):
     """
     Receives auction data daily time series cleaned by auction_prices_analysis module and returns cleaner data ready to be used in plot function.
     """
@@ -93,29 +89,32 @@ def tide_auction_data(df,
 
     # NoteRate range if NoteRate is a column 
     if 'NoteRate' in df.columns:
-        print("NoteRate range: ", noterate_range)
-        df = df[(df['NoteRate'] >= noterate_range[0]) & (df['NoteRate'] <= noterate_range[1])]  
+        print("NoteRate range: ", interval)
+        df = df[(df['NoteRate'] >= interval[0]) & (df['NoteRate'] <= interval[1])]  
 
     return df
 
 
-def tide_collapse_bloomberg_data(df_, noterate_range,
+def tide_collapse_bloomberg_data(df_, interval,
                                 min_date = '2020-01-01', max_date = '2021-12-31', #'2020-05-01'
                                 tickers = ['FNCL', 'FGLMC'],
                                 service_fee = 0.75,
-                                group_by = ['Trading_Date', 'Coupon']
+                                group_by = ['Trading_Date', 'Coupon'],
+                                bycoupon = True
                                 ):
     """
     Receives bloomberg data daily cleaned and returns cleaner time series data ready to be used in plot function.
     """
     df = df_.copy()
-    # trading dates 2020
-    # df = df[df['Trading_Date'].dt.year == 2020] # same dates that other dataset
-    df = df[(df['Trading_Date'] < pd.to_datetime(max_date)) & (df['Trading_Date'] >= pd.to_datetime(min_date))]
 
-    # coopon rate that is between noterate_range
-    df = df[(df['Coupon'] >= noterate_range[0]- service_fee - 0.25) 
-            & (df['Coupon'] < noterate_range[1] - service_fee + 0.25)]
+    # coupon rate that is between interval
+    # * rule for note rates
+    if bycoupon:
+        df = df[(df['Coupon'] >= interval[0]) 
+                & (df['Coupon'] <= interval[1])]
+    else: 
+        df = df[(df['Coupon'] >= interval[0]- service_fee - 0.25) 
+                & (df['Coupon'] < interval[1] - service_fee + 0.25)]
 
     print("Coupons in range: ", df['Coupon'].unique())
 
@@ -123,6 +122,15 @@ def tide_collapse_bloomberg_data(df_, noterate_range,
     df = df[df['Ticker'].isin(tickers)]
     # group by to get one price PX_Last, per day, coupon (avg across months forwards and ticker )
     df = df.groupby(group_by).agg({'PX_Last': 'mean'}).reset_index()
+
+    # create Month Year variable
+    df['MonthYear'] = (
+        df["Trading_Date"].dt.month_name() + "-" + df["Trading_Date"].dt.year.astype(str)
+    )
+    # create date time column withfirst day of Committed date: e.g. 2020-01-22 -> 2020-01-01
+    df['FirstMonthYear'] = df['Trading_Date'].dt.to_period('M').dt.to_timestamp()
+
+    df = df[(df['Trading_Date'] < pd.to_datetime(max_date)) & (df['Trading_Date'] >= pd.to_datetime(min_date))]
 
     print("Number of observations: ", df.shape[0])
 
@@ -219,7 +227,7 @@ def plot(df, var, maturity, initial_stat = "Mean",
         plt.legend(loc="upper left")
 
     if save:
-        fig.savefig(f'{auction_save_folder}/{var}_mat{maturity}_loan{loantype}_timeseries_nr_{noterate_range[0]}_{noterate_range[1]}.pdf')
+        fig.savefig(f'{auction_save_folder}/{var}_mat{maturity}_loan{loantype}_timeseries_nr_{interval[0]}_{interval[1]}.pdf')
 
     return fig, ax
 
@@ -259,13 +267,13 @@ def build_values_note_rate_from_TBA(df_tba,
                                     df_noterate_timeseries,
                                     maturity = 30,
                                     loantype = 1,
-                                    noterate_range = [2.5, 3.5]):
+                                    interval = [2.5, 3.5]):
     """
     This function builds the values of the note rate from the TBA data.
     """
     # filter df_nr by noterate range, NoteRate variable
-    df_noterate_timeseries.loc[ (df_noterate_timeseries['NoteRate'] >= noterate_range[0]) &
-                                                     (df_noterate_timeseries['NoteRate'] <= noterate_range[1]), :]
+    df_noterate_timeseries.loc[ (df_noterate_timeseries['NoteRate'] >= interval[0]) &
+                                                     (df_noterate_timeseries['NoteRate'] <= interval[1]), :]
     
 
     # for each note rate calculate the value of the note rate from the TBA data 
@@ -350,16 +358,25 @@ if __name__ == '__main__':
 
     # * auction OB data
 
+    var_time = 'MonthYear'
+    var_rate = 's_coupon'
+
     # choosing note rate range
-    noterate_range = noterange_list[5]
+    interval = ap.couponrange_list[2]
     # building path 
-    filename_timeseries_all = f'{auction_filename}_mat{maturity}_loan{loantype}_timeseries_'
-    filename_timeseries = f'{auction_filename}_mat{maturity}_loan{loantype}_timeseries_nr_{noterate_range[0]}_{noterate_range[1]}'
+    filename_timeseries_all = f'{auction_filename}_mat{maturity}_loan{loantype}_timeseries_{var_rate}_{var_time}_auctype'
+    filename_timeseries = f'{auction_filename}_mat{maturity}_loan{loantype}_timeseries_{var_rate}_{interval[0]}_{interval[1]}_{var_time}_auctype'
 
-    print('Note rate range: ', noterate_range)
 
-    df_ts = read_data(file = filename_timeseries, path = auction_data_folder)
-    df_ts_all = read_data(file = filename_timeseries_all, path = auction_data_folder)
+
+    df_ts = read_data(file = f'timeseries/{filename_timeseries_all}', 
+                      path = auction_data_folder,
+                      datetime_vars= [])
+
+    print('Note rate range: ', interval)
+    df_ts_all = read_data(file = f'timeseries/{filename_timeseries}',
+                        path = auction_data_folder,
+                        datetime_vars=[])
     
     # %%
     df_ts.columns
@@ -369,10 +386,10 @@ if __name__ == '__main__':
     # %%
     # ts = filter_bins_rates(df_ts, min_rate = 3, max_rate = 3.75)
     ts = tide_auction_data(df_ts)
-    ts_all = tide_auction_data(df_ts_all, noterate_range= noterate_range)
+    ts_all = tide_auction_data(df_ts_all, interval= interval)
     ts.head()
     # %%
-    ts_all_agg = filter_bins_rates(ts_all, min_rate = noterate_range[0], max_rate = noterate_range[1])
+    ts_all_agg = filter_bins_rates(ts_all, min_rate = interval[0], max_rate = interval[1])
     # %%
 
     # * bloomberg data
@@ -383,19 +400,19 @@ if __name__ == '__main__':
     df_bl.head()
 
     # %%
-    df_bl_2020 = tide_collapse_bloomberg_data(df_bl, noterate_range= noterate_range)
+    df_bl_2020 = tide_collapse_bloomberg_data(df_bl, interval= interval)
     df_bl_2020.head()
     # 0 Coupons in range:  [2.5 3.  3.5 4.  4.5 5.  5.5 6.  6.5]
     # 3 [2.5 3.  3.5]
     # 5 Coupons in range:  [3.5 4.  4.5]
     
-    df_bl_2020_ts = tide_collapse_bloomberg_data(df_bl, noterate_range= noterate_range, group_by=['Trading_Date'])
+    df_bl_2020_ts = tide_collapse_bloomberg_data(df_bl, interval= interval, group_by=['Trading_Date'])
 
 
     # %%
     df_tba = build_values_note_rate_from_TBA(df_tba = df_bl_2020,
                                     df_noterate_timeseries = ts_all,
-                                    noterate_range = noterate_range)
+                                    interval = interval)
     
     df_tba.head()
     # %%
