@@ -2,11 +2,11 @@
 Created on Thu June 1, 2023
 @author: Giselle Labrador Badia (@gisslab)
 
-This module is used to analyze the auction prices data from the OB (Optimal Blue) bid evel data data. 
+This module is used to analyze the auction prices data from the OB (Optimal Blue) bid level data data. 
 
 input: 
      file : csv file with the auction prices data from the OB (Optimal Blue) bid evel data data.
-     path : auction_save_folder
+     path : '/project/houde/mortgages/QE_Covid/data/data_auction/clean_data'
 
 output:
     - csv file with auction/loan level data and measures of the prices (bids).
@@ -28,6 +28,8 @@ from datetime import datetime
 auction_data_folder = '/project/houde/mortgages/QE_Covid/data/data_auction/clean_data'
 # auction_save_folder = '/project/houde/mortgages/data/intermediate/ob_auctions'
 auction_save_folder = '/project/houde/mortgages/QE_Covid/data/data_auction/clean_data'
+
+table_folder = '/project/houde/mortgages/QE_Covid/results/tables'
 
 auction_filename = 'combined_auctions_jan2018-jul2022_cleaned'
 
@@ -108,6 +110,9 @@ noterange_list = [(1,7),(2, 2.75), (2.75, 3.5), (3, 3.75), (3.75, 5.25),(4, 4.75
 """ List of tuples with the ranges of the note rate to be used in the analysis. The elements are:
 [(1,7),(2, 2.75), (2.75, 3.5), (3, 3.75), (3.75, 5.25),(4, 4.75), (5, 7),(3.5, 3.5), (4.5, 4.5) ] """
 
+couponrange_list = [(1,5), (1,1.5), (2, 2.5), (2.5, 3), (3, 3.5), (3.5, 4), (4, 4.5)]
+""" List of tuples with the ranges of the coupon to be used in the analysis. The elements are:
+[(1,5),(1,1.5), (2, 2.5), (2.5, 3), (3, 3.5), (3.5, 4), (4, 4.5)] """
 
 # * stat functions
 
@@ -152,7 +157,7 @@ def read_data():
     Reads the data from the auction data folder and returns a dataframe.
     """
 
-    filepath = f'{auction_save_folder}/{auction_filename}.csv'
+    filepath = f'{auction_data_folder}/{auction_filename}.csv'
     try: 
         df_auc = pd.read_csv(filepath,
                             sep='|'
@@ -218,6 +223,10 @@ def clean_data(df):
         df["CommittedDate"].dt.month_name() + "-" + df["CommittedDate"].dt.year.astype(str)
     )
 
+    # create date time column withfirst day of Committed date: e.g. 2020-01-22 -> 2020-01-01
+    df['FirstMonthYear'] = df['CommittedDate'].dt.to_period('M').dt.to_timestamp()
+
+
     # convert loan ammount to thousands
     df['LoanAmount'] = df['LoanAmount']/1000
 
@@ -254,6 +263,10 @@ def clean_data(df):
 
     # bulk bidders percentage
     df['bulk_bidders_fraction'] = df['Number of Bulk Bidders']/df['Number of Participants']
+    
+    # remove auction with coupons that are not in the list from 1 to 5.5 adding 0.5 (removing odd coupons, e.g. 2.972)
+    coupons = [x/2 for x in range(2, 11)]
+    df = df.loc[df['s_coupon'].isin(coupons), :]
 
 
     # * end, summary and save 
@@ -279,6 +292,7 @@ def create_measures_collapse(df):
                                         'HedgeClientKey' : 'first', #! check this
                                         'CommittedDate': 'first',
                                         'MonthYear': 'first',
+                                        'FirstMonthYear': 'first',
                                         'BorrowerClosingDate': 'first',
                                         'DaysToAuction': 'first',
                                         'Number of Enterprise Bidders': 'first',
@@ -304,6 +318,7 @@ def create_measures_collapse(df):
                                         'bulk_bidders_fraction': 'max',
                                         's_coupon': 'first',
                                         }).reset_index()
+    
 
     
     # rename to eliminate multiindex and other small details
@@ -311,6 +326,10 @@ def create_measures_collapse(df):
     df.columns = [col.replace('_first', '') for col in df.columns.values]
     df.columns = [col.replace('_max', '') for col in df.columns.values]
     df = df.rename(columns={'Auction ID_': 'Auction ID'})
+
+    # create auction classification
+    df.loc[(df_auc['sold_GSE'] == 0) & (df_auc['dummy_sell_any']==1), 'auction_type'] = 'auction'
+    df.loc[df['sold_GSE'] == 1.0, 'auction_type'] = 'cash_window'
 
     # print("Summary of the data: ", df.describe())
     print("Number of observations: ", df.shape[0])
@@ -326,25 +345,26 @@ def create_measures_collapse(df):
 def to_time_series(df, bynote=False, 
                    add_name = '', 
                    var_time = 'CommittedDate', # alternatice 'MonthYear'
-                   var_rate = 'NoteRate'): # alternative 's_coupon'
+                   var_rate = 'NoteRate',
+                   groupby_other = []): # alternative 's_coupon'
     """
     Creates a time series dataframe from the auction level dataframe.
     """
     df = df.copy()
     
-    group = [var_time, var_rate] if bynote else [var_time]
+    group = [var_time, var_rate] + groupby_other if bynote else [var_time]  + groupby_other 
 
     # loan amount group and transform by day and noterate
-    df['loan_amount_time_noterate'] = df.groupby(group)['LoanAmount'].transform('sum')
+    df['loan_amount_group'] = df.groupby(group)['LoanAmount'].transform('sum')
 
     # all price variables
     vars_iter = [var for var in df.columns if 'Price' in var]
 
     # create weighted price variables by loan amount by day and noterate
-    df['loan_weight'] = df['LoanAmount'] / df['loan_amount_time_noterate']
+    df['loan_weight'] = df['LoanAmount'] / df['loan_amount_group']
 
     for var in vars_iter:
-        print(var)
+        # print(var)
         df[f"{var}_weighted"] = df[var] * df['loan_weight']
 
     stats_max_price = stats_auction
@@ -356,10 +376,11 @@ def to_time_series(df, bynote=False,
                 'CommittedPrice', 
                 'Price_weighted', 
                 'CommittedPrice_weighted', 
-                'LoanAmount']
+                'LoanAmount'
+                ]
 
     for f in wind_list:
-        print("Windsorized: " , f)
+        # print("Windsorized: " , f)
         df[f] = winsorize_series(df[f], 0.001, 0.999) 
     
 
@@ -368,6 +389,7 @@ def to_time_series(df, bynote=False,
                                 'Price': stats_max_price,
                                 'CommittedPrice': 'first',
                                 'CommittedPrice_weighted': 'sum', # accepted price
+                                'FirstMonthYear': 'first',
                                 'Auction ID': 'count',
                                 'BorrowerClosingDate': 'first',
                                 'DaysToAuction': 'mean',
@@ -402,24 +424,45 @@ def to_time_series(df, bynote=False,
     df.columns = [col.replace('Price_weighted', 'w_winner_bid') for col in df.columns.values]
     df.columns = [col.replace('Price', 'winner_bid') for col in df.columns.values]
     df = df.rename(columns={'Auction ID_count': 'number_auctions',
-                            'CommittedDate_': 'CommittedDate',
-                            'w_winner_bid_sum' : 'w_winner_bid_mean'
+                            'w_winner_bid_sum' : 'w_winner_bid_mean',
+                            'Committedw_winner_bid_sum' : 'committed_bid_mean',
                             })
-    if bynote:
-        df = df.rename(columns={'NoteRate_': 'NoteRate',
-                                's_coupon_': 's_coupon'
-                                })
+    # remove '_' character only when last character
+    df.columns = [col[:-1] if col[-1] == '_' else col for col in df.columns.values]
+
     # summary of the data
     # print("Summary of the data: ", df.describe())
     print("Number of observations: ", df.shape[0])
     # print("Column names: ", df.columns)
 
     # save data
-    filename = f'{auction_save_folder}/{auction_filename}_mat{maturity}_loan{loantype}_timeseries_{add_name}.csv'
+    filename = f'{auction_save_folder}/timeseries/{auction_filename}_mat{maturity}_loan{loantype}_timeseries_{add_name}.csv'
     print("Saving data to: ", filename)
     df.to_csv(filename , sep='|', index=False)
 
     return df
+
+def create_table_coupons(df_auc, table_folder):
+    """
+    Summary table of the auctions and note rates by coupon. Save latex table in 'table_folder' and returns summary dataframe.
+    """
+
+    df_coupon = df_auc.groupby('s_coupon').agg({'Auction ID' : 'count',
+                                                'NoteRate': ['min', 'mean', 'median', 'max']
+                                                }
+                                                ).reset_index()
+    
+    df_coupon = df_coupon.rename(columns={'Auction ID': 'auctions', 
+                                        's_coupon': 'coupon',
+                                        'NoteRate': 'note rate'})
+    
+    df_coupon= df_coupon.round(3)
+
+    df_coupon.to_latex(f'{table_folder}/auctions_coupon__mat{maturity}_loan{loantype}.tex',
+                        index=False, 
+                        float_format="%.3f")
+    
+    return df_coupon 
 
 
 # %%
@@ -431,11 +474,11 @@ if __name__ == '__main__':
     # %%
     # * saving coupon 
 
-    df_coupon = read_get_security_characteristics() 
+    # df_coupon = read_get_security_characteristics() 
 
     # %%
     filename = 'ob_hmda_mbs_security_coupon.csv'
-    df_coupon = pd.read_csv(f'{auction_save_folder}/{filename}', sep=',')
+    df_coupon = pd.read_csv(f'{auction_data_folder}/{filename}', sep=',')
     # %%
     df_coupon.head()
 
@@ -502,7 +545,7 @@ if __name__ == '__main__':
     df_auc = create_measures_collapse(df1)
 
     # %%
-    # ***************** read data at auction level *****************
+    # # ***************** read data at auction level *****************
 
     df_auc = pd.read_csv(f'{auction_save_folder}/{auction_filename}_mat{maturity}_loan{loantype}_auction_level.csv', sep='|')
 
@@ -515,7 +558,7 @@ if __name__ == '__main__':
     df_auc[cols_describe].describe()
 
     # %%
-    df_auc[['Auction ID','CommittedInvestorKey',  'CommittedPrice','Price', 'NoteRate', 's_coupon' ]].describe()
+    # df_auc[['Auction ID','CommittedInvestorKey',  'CommittedPrice','Price', 'NoteRate', 's_coupon' ]].describe()
 
     # %%
     # * not sold to anyone stats
@@ -542,9 +585,15 @@ if __name__ == '__main__':
     print("Percent missing s_coupon: ", percent_missing_coupon)
 
     # %%
-    # * testing winsorize
-    print(df_auc['Price'].mean(), "number of elements: ", df_auc['Price'].shape[0])
-    winsorize_series(df_auc['Price'], 0.05, 0.95).mean()
+    # * table with coupons informations
+     
+    table_coupons = create_table_coupons(df_auc, table_folder)
+    table_coupons
+
+    # %%
+    # # * testing winsorize
+    # print(df_auc['Price'].mean(), "number of elements: ", df_auc['Price'].shape[0])
+    # winsorize_series(df_auc['Price'], 0.05, 0.95).mean()
 
     # %%
 
@@ -561,43 +610,40 @@ if __name__ == '__main__':
                                     bynote=True,
                                     var_time= var_time, 
                                     var_rate= var_rate,
-                                    add_name= f'{var_rate}_{var_time}'
+                                    add_name= f'{var_rate}_{var_time}_auctype',
+                                    groupby_other = ['auction_type']
         )
 
-    # # %%
+    # %%
 
     # * By rates or coupons 
 
 
-    noterange_list = [(1,7),(2, 2.75), (2.75, 3.5), (3, 3.75), (3.75, 5.25),(4, 4.75), (5, 7), (3.5, 3.5), (4.5, 4.5)]
+    list = couponrange_list # noterange_list
 
 
-    print("*********  Note rates intervals  *********")
-    for (min_nr, max_nr) in noterange_list:
+    print("*********  intervals  *********")
+    for (min_nr, max_nr) in list:
 
         print("********* ", min_nr, " - ", max_nr, "  *********")
         df_auc_1 = df_auc[ (df_auc[var_rate] >= min_nr) & (df_auc[var_rate] <= max_nr)].copy()
         df_time_series_1 = to_time_series(df_auc_1, 
                                         bynote=False, 
                                         var_time='MonthYear',
-                                        add_name= f'{var_rate}_{min_nr}_{max_nr}_{var_time}'
+                                        var_rate= var_rate,
+                                        add_name= f'{var_rate}_{min_nr}_{max_nr}_{var_time}_auctype',
+                                        groupby_other = ['auction_type']
                                         )
+    
+    # %% 
+    # count nan in auction_type
 
-    # # %%
-    # # * Separate cash windows (GSE bid accepted) and auction transactions (non GSE investors bid accepted)
-    # # ? Questions is what to do when non GSE key bid appears as the buyer (Committed) but it is not one of the bids. 
+    print("Percentage nan ", df_auc['auction_type'].isna().sum()/df_auc.shape[0])
+    print("Percentage cash window ", df_auc['auction_type'].value_counts()['cash_window']/df_auc.shape[0])
+    print("Percentage auction ", df_auc['auction_type'].value_counts()['auction']/df_auc.shape[0])
 
-    cash_windows = df_auc[df_auc['sold_GSE'] == 1].copy() 
-    # # ? sold GSE are where Committed is GSE (does not have to be in the bids), is this right?
-
-
-    # # %%
-    # auction_trans = df_auc[(df_auc['sold_GSE'] == 0) & df_auc['dummy_sell_any']==1].copy()
-    # # ? Maybe not need to remove transactions where the buyer is not one of the bidders. 
-    # # ? option is to only remove where the buyer is not the seller (Commited and HedgeClientKey are different)
-
-    # # %%
-    # df_time_series_1[['w_winner_bid_mean', 'winner_bid_mean']].head(30)
+    #! should be less than 27% (number of auctions with nan auction_type)
+    # %% 
 
     # * end of main
 
