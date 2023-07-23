@@ -360,6 +360,8 @@ def to_time_series(df, bynote=False,
     # all price variables
     vars_iter = [var for var in df.columns if 'Price' in var]
 
+    # TODO: Fix weighted aggregation of prices, still given smaller than mean numbers e.g. 20 when count is small. 
+
     # create weighted price variables by loan amount by day and noterate
     df['loan_weight'] = df['LoanAmount'] / df['loan_amount_group']
 
@@ -545,7 +547,7 @@ if __name__ == '__main__':
     df_auc = create_measures_collapse(df1)
 
     # %%
-    # # ***************** read data at auction level *****************
+    # # ***************** read data at auction level clean *****************
 
     df_auc = pd.read_csv(f'{auction_save_folder}/{auction_filename}_mat{maturity}_loan{loantype}_auction_level.csv', sep='|')
 
@@ -614,12 +616,28 @@ if __name__ == '__main__':
                                     groupby_other = ['auction_type']
         )
 
+    df_time_series1 = to_time_series(df_auc, 
+                                    bynote=True,
+                                    var_time= var_time, 
+                                    var_rate= var_rate,
+                                    add_name= f'{var_rate}_{var_time}',
+                                    groupby_other = []
+        )
+
+    df_time_series2 = to_time_series(df_auc, 
+                                bynote=False,
+                                var_time= var_time, 
+                                var_rate= var_rate,
+                                add_name= f'{var_time}',
+                                groupby_other = []
+    )
+
     # %%
 
     # * By rates or coupons 
 
 
-    list = couponrange_list # noterange_list
+    list = [(2.5,4)]#couponrange_list # noterange_list
 
 
     print("*********  intervals  *********")
@@ -627,13 +645,22 @@ if __name__ == '__main__':
 
         print("********* ", min_nr, " - ", max_nr, "  *********")
         df_auc_1 = df_auc[ (df_auc[var_rate] >= min_nr) & (df_auc[var_rate] <= max_nr)].copy()
-        df_time_series_1 = to_time_series(df_auc_1, 
+
+        df_time_series3 = to_time_series(df_auc_1, 
                                         bynote=False, 
                                         var_time='MonthYear',
                                         var_rate= var_rate,
                                         add_name= f'{var_rate}_{min_nr}_{max_nr}_{var_time}_auctype',
                                         groupby_other = ['auction_type']
                                         )
+
+        df_time_series4 = to_time_series(df_auc_1, 
+                                bynote=False, 
+                                var_time='MonthYear',
+                                var_rate= var_rate,
+                                add_name= f'{var_rate}_{min_nr}_{max_nr}_{var_time}_agg',
+                                groupby_other = []
+                                )
     
     # %% 
     # count nan in auction_type
