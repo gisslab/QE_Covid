@@ -4,6 +4,7 @@ papers/
 Icon
 code/initial_data_cleaning/
 institutional/
+.history/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
