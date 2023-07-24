@@ -80,9 +80,17 @@ The following figures show the daily time series of amounts and prices of FED pu
 \pagebreak
 \section{OB Auctions in the Early Covid Period}
 
-The following figure shows a histogram of all bids for all auctions in the oB platform for the months of January, February, March, and April 2020. The product is Conforming loans with a 30-year maturity. 
+To analyse the OB auctions, we merge track each loan that was auctioned to know the MBS to which the loan was eventually pool. Then each loan is matched with an MBS coupon. The matched successed was around 95 \%. Below, we can see the summary of the amount of laons per coupon and statistics about the note rates that were pooled in each coupon.
+
+\input{../results/tables/summary_coupon.tex}
+
+
+For this analysis, we define net bid as the difference between the auctions in TBA and the TBA Bloomberg price. Hence the collapsed OB auction bids are merged by coupon with the TBA Bloomberg price. We focus on conforming loans with a 30-year maturity with 2 month forward.
 
 %figure 
+
+The following figure shows a histogram of all bids for all auctions in the OB platform between January 2020 and December 2021. 
+
 
 \begin{figure}[h]
     \centering
