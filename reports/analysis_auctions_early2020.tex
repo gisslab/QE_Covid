@@ -89,9 +89,9 @@ The product is Conforming loans with a 30-year maturity.
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.62\textwidth]{../results/figures/distribution_of_bids.png}
-    \caption{Histogram of all bids for all auctions in the oB platform for the months of January, February, March, and April 2020. The product is Conforming loans with a 30-year maturity.}
+    \caption{Histogram of all bids for all auctions in the oB platform for January, February, March, and April 2020. The product is Conforming loans with a 30-year maturity.}
     \begin{minipage}{\textwidth}
-        \footnotesize{\textit{Notes:} The figure shows a histogram of all bids for all auctions in the OB platform for the months of January, February, March, and April 2020. The product is Conforming loans with a 30-year maturity. } 
+        \footnotesize{\textit{Notes:} The figure shows a histogram of all bids for all auctions in the OB platform for January, February, March, and April 2020. The product is Conforming loans with a 30-year maturity. } 
         \end{minipage}
 \end{figure}
 
@@ -99,7 +99,7 @@ This figure shows a histogram for the note rates by auction for the same period 
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.62\textwidth]{../results/figures/distribution_of_noterates.png}
-  \caption{Histogram of all bids for all auctions in the oB platform for the months of January, February, March, and April 2020. The product is Conforming loans with a 30-year maturity.}
+  \caption{Histogram of all bids for all auctions in the oB platform for January, February, March, and April 2020. The product is Conforming loans with a 30-year maturity.}
   \begin{minipage}{\textwidth}
       \footnotesize{\textit{Notes:} The figure shows a histogram of all note rates of auctioned loans in the OB platform for the months of January, February, March, and April 2020. The product is Conforming loans with a 30-year maturity. } 
       \end{minipage}
@@ -141,7 +141,7 @@ A similar table is depicted for the months of January and February and for the m
   \input{../results/tables/auctions_level_mat30_loan1_mar-apr.tex}
   \caption{Descriptive statistics at the auction level of March and April 2020. }
   \begin{minipage}{\textwidth}
-      \footnotesize{\textit{Notes:} The table shows descriptive statistics at the auction level of observation for the months of March and April 2020. The product is Conforming loans with a 30-year maturity. } 
+      \footnotesize{\textit{Notes:} The table shows descriptive statistics at the auction level of observation for March and April 2020. The product is Conforming loans with a 30-year maturity. } 
       \end{minipage}
 \end{table}
 
@@ -151,7 +151,7 @@ A similar table is depicted for the months of January and February and for the m
 This section includes a time series analysis of the OB auctions in the early COVID period. The analysis is done at the monthly level. The product is Conforming loans with a 30-year maturity. It includes the price and quantities of the auctions, as well as the number of auctions per period. Next, distress signs are explored by looking at the number of participants, the number of bids, and the number of bulk bids. Finally, the GSEs' response is by plotting the number of bids by the GSE and the number of auctions won by GSEs.
 % In all cases, the analysis includes a comparison between note rates around 3 - 3.75\% and note rates around 4 - 4.75\%.
 
-To analyse the OB auctions, we merge track each loan that was auctioned to know the MBS to which the loan was eventually pool. Then each loan is matched with an MBS coupon. The matched successed was around 95 \%. Below, we can see the summary of the amount of laons per coupon and statistics about the note rates that were pooled in each coupon. 
+To analyze the OB auctions, we merge track each loan that was auctioned to know the MBS to which the loan was eventually pool. Then each loan is matched with an MBS coupon. The matched rate was around 95 \%. Below, we can see the summary of the number of loans per coupon and statistics about the note rates that were pooled in each coupon. 
 
 
 \begin{table}[h]
@@ -159,13 +159,13 @@ To analyse the OB auctions, we merge track each loan that was auctioned to know 
   \input{../results/tables/auctions_coupon__mat30_loan1.tex}
   \caption{Descriptive statistics at the auction level January and February 2020. }
   \begin{minipage}{\textwidth}
-      \footnotesize{\textit{Notes:} The table shows descriptive statistics at the auction level of observation for the  period January 2020 to December 2021.
+      \footnotesize{\textit{Notes:} The table shows descriptive statistics at the auction level of observation for the period January 2020 to December 2021.
      The product is Conforming loans with a 30-year maturity. } 
       \end{minipage}
 \end{table}
 
 
-For this analysis, we define net bid as the difference between the auctions in TBA and the TBA Bloomberg price. Hence the collapsed OB auction bids are merged by coupon with the TBA Bloomberg price. We focus on conforming loans with a 30-year maturity with 2 month forward.
+For this analysis, we define net bid as the difference between the auctions in OB and the TBA Bloomberg price on the day of the auction. Hence, the collapsed OB auction bids are merged by coupon with the TBA Bloomberg price. We focus on conforming loans with a 30-year maturity with 2 months forward.
 
 
 % \pagebreak
@@ -186,16 +186,16 @@ The following figures show OB auctions mean, median higher bid, quantities, and 
       \caption{Loan amount}
      \end{subfigure}
      \begin{subfigure}[b]{0.49\textwidth}
-      \includegraphics[width=0.998\textwidth]{../results/figures/w_winner_bid_mean_mat30_loan1_timeseries_cpmonthly
+      \includegraphics[width=0.998\textwidth]{../results/figures/winner_bid_mean_mat30_loan1_timeseries_cpmonthly_2.5_4__netbid.pdf}
       \caption{ Mean of highest net bid}
      \end{subfigure}
      \begin{subfigure}[b]{0.49\textwidth}
-      \includegraphics[width=0.998\textwidth]{../results/figures/winner_bid_median_mat30_loan1_timeseries_cp_monthly_2.5_4_.pdf}
+      \includegraphics[width=0.998\textwidth]{../results/figures/winner_bid_median_mat30_loan1_timeseries_cpmonthly_2.5_4__netbid.pdf}
       \caption{ Median of highest net bid}
      \end{subfigure}
    \caption{OB auction outcomes. } 
    \begin{minipage}{\textwidth}
-      \footnotesize{\textit{Notes:} The figure shows the time series of auction outcomes for Conforming loans with a 30-year maturity.  The vertical lines is March 1. For reference, Bloomberg TBA prices are aggregated for all forward months and coupons between 1 and 7. }
+      \footnotesize{\textit{Notes:} The figure shows the time series of auction outcomes for Conforming loans with a 30-year maturity.  The vertical line is March 1. The net bid is calculated by subtracting the TBA Bloomberg price for the same coupon and two forward months from the OB auction price. }
       \end{minipage}
 \end{figure}
 
@@ -222,7 +222,7 @@ The following figures show OB auctions mean, median higher bid, quantities, and 
 %      \end{subfigure}
 %    \caption{OB auction outcomes for note rates between 3\% and 3.75\%}
 %    \begin{minipage}{\textwidth}
-%       \footnotesize{\textit{Notes:} The figure shows time series of auction outcomes for Conforming loans with a 30-year maturity. The vertical lines is March 1. For reference, Bloomberg TBA prices are aggregated for all forward months and coupons between 2.5, 3, and 3.5. } 
+%       \footnotesize{\textit{Notes:} The figure shows time series of auction outcomes for Conforming loans with a 30-year maturity. The vertical line is March 1. For reference, Bloomberg TBA prices are aggregated for all forward months and coupons between 2.5, 3, and 3.5. } 
 %       \end{minipage}
 % \end{figure}
 
@@ -248,7 +248,7 @@ The following figures show OB auctions mean, median higher bid, quantities, and 
 %      \end{subfigure}
 %    \caption{OB auction outcomes for note rates between 4\% and 4.75\%}
 %    \begin{minipage}{\textwidth}
-%       \footnotesize{\textit{Notes:} The figure shows the time series of auction outcomes for Conforming loans with a 30-year maturity.  The vertical lines is March 1. For reference, Bloomberg TBA prices are aggregated for all forward months and coupons 3.5, 4, and 4.5. } 
+%       \footnotesize{\textit{Notes:} The figure shows the time series of auction outcomes for Conforming loans with a 30-year maturity.  The vertical line is March 1. For reference, Bloomberg TBA prices are aggregated for all forward months and coupons 3.5, 4, and 4.5. } 
 %       \end{minipage}
 % \end{figure}
 
@@ -260,84 +260,30 @@ Below, we show distress and illiquidity measures in the OB auctions during the e
 \begin{itemize}
 \item \textbf{Days to auction}: Number of days between the auction date and the date the loan originated.
 \item \textbf{Number of participants}: Number of participants in the auction.
-\item  \textbf{Sell rate:} Rate to which the loan is sold to an auction participant. 
+\item  \textbf{Winner Sell rate:} Rate to which the loan is sold to the auction participant with the highest bid. Since the highest bid is not always the winning bid because sometimes the winner's bid is missing, and other times the committed investor is not the one with the highest bid. 
 \item \textbf{Fraction of bulk bidders:} Fraction of bids that are bulk bids.
 \end{itemize}
 \begin{figure}[h]
   \centering
   \begin{subfigure}[b]{0.49\textwidth}
-      \includegraphics[width=0.998\textwidth]{../results/figures/DaysToAuction_mean_mat30_loan1_timeseries_nr_1_7.pdf}
+      \includegraphics[width=0.998\textwidth]{../results/figures/DaysToAuction_mean_mat30_loan1_timeseries_nrmonthly_2.5_4_.pdf}
       \caption{Days to auction}
      \end{subfigure}
      \begin{subfigure}[b]{0.49\textwidth}
-      \includegraphics[width=0.998\textwidth]{../results/figures/Number of Participants_mean_mat30_loan1_timeseries_nr_1_7.pdf}
+      \includegraphics[width=0.998\textwidth]{../results/figures/Number of Participants_mean_mat30_loan1_timeseries_nrmonthly_2.5_4_.pdf}
       \caption{ Number of participants}
      \end{subfigure}
      \begin{subfigure}[b]{0.49\textwidth}
-      \includegraphics[width=0.998\textwidth]{../results/figures/dummy_sell_any_mean_mat30_loan1_timeseries_nr_1_7.pdf}
-      \caption{ Sell rate}
-     \end{subfigure}
+      \includegraphics[width=0.998\textwidth]{../results/figures/dummy_sell_winner_mean_mat30_loan1_timeseries_nrmonthly_2.5_4_.pdf}
+      \caption{ Winner sell rate}
+      \end{subfigure}
      \begin{subfigure}[b]{0.49\textwidth}
-      \includegraphics[width=0.998\textwidth]{../results/figures/bulk_bidders_fraction_mean_mat30_loan1_timeseries_nr_1_7.pdf}
+      \includegraphics[width=0.998\textwidth]{../results/figures/bulk_bidders_fraction_mean_mat30_loan1_timeseries_nrmonthly_2.5_4_.pdf}
       \caption{ Fraction of bulk bidders}
      \end{subfigure}
      \caption{OB auction outcomes. } 
    \begin{minipage}{\textwidth}
-      \footnotesize{\textit{Notes:} The figure shows time series of auction outcomes for Conforming loans with a 30-year maturity. The vertical lines is March 1.  } 
-      \end{minipage}
-\end{figure}
-
-\pagebreak
-\subsubsection{Comparison of note rates}
-
-Below, we show the same variables as above, but for different note rates. 
-
-\begin{figure}[h]
-  \centering
-  \begin{subfigure}[b]{0.49\textwidth}
-      \includegraphics[width=0.998\textwidth]{../results/figures/DaysToAuction_mean_mat30_loan1_timeseries_nr_3_3.75.pdf}
-      \caption{Days to auction}
-     \end{subfigure}
-     \begin{subfigure}[b]{0.49\textwidth}
-      \includegraphics[width=0.998\textwidth]{../results/figures/Number of Participants_mean_mat30_loan1_timeseries_nr_3_3.75.pdf}
-      \caption{ Number of participants}
-     \end{subfigure}
-     \begin{subfigure}[b]{0.49\textwidth}
-      \includegraphics[width=0.998\textwidth]{../results/figures/dummy_sell_any_mean_mat30_loan1_timeseries_nr_3_3.75.pdf}
-      \caption{ Sell rate}
-     \end{subfigure}
-     \begin{subfigure}[b]{0.49\textwidth}
-      \includegraphics[width=0.998\textwidth]{../results/figures/bulk_bidders_fraction_mean_mat30_loan1_timeseries_nr_3_3.75.pdf}
-      \caption{ Fraction of bulk bidders}
-     \end{subfigure}
-     \caption{OB auction outcomes for note rates between 3\% and 3.75\%.  } 
-   \begin{minipage}{\textwidth}
-      \footnotesize{\textit{Notes:} The figure shows time series of auction outcomes for Conforming loans with a 30-year maturity. The vertical lines is March 1.  } 
-      \end{minipage}
-\end{figure}
-
-\pagebreak
-\begin{figure}[h]
-  \centering
-  \begin{subfigure}[b]{0.49\textwidth}
-      \includegraphics[width=0.998\textwidth]{../results/figures/DaysToAuction_mean_mat30_loan1_timeseries_nr_4_4.75.pdf}
-      \caption{Days to auction}
-     \end{subfigure}
-     \begin{subfigure}[b]{0.49\textwidth}
-      \includegraphics[width=0.998\textwidth]{../results/figures/Number of Participants_mean_mat30_loan1_timeseries_nr_4_4.75.pdf}
-      \caption{ Number of participants}
-     \end{subfigure}
-     \begin{subfigure}[b]{0.49\textwidth}
-      \includegraphics[width=0.998\textwidth]{../results/figures/dummy_sell_any_mean_mat30_loan1_timeseries_nr_4_4.75.pdf}
-      \caption{ Sell rate}
-     \end{subfigure}
-     \begin{subfigure}[b]{0.49\textwidth}
-      \includegraphics[width=0.998\textwidth]{../results/figures/bulk_bidders_fraction_mean_mat30_loan1_timeseries_nr_4_4.75.pdf}
-      \caption{ Fraction of bulk bidders}
-     \end{subfigure}
-     \caption{OB auction outcomes for note rates between 4\% and 4.75\%. } 
-   \begin{minipage}{\textwidth}
-      \footnotesize{\textit{Notes:} The figure shows the time series of auction outcomes for Conforming loans with a 30-year maturity. The vertical lines is March 1.  } 
+      \footnotesize{\textit{Notes:} The figure shows time series of auction outcomes for Conforming loans with a 30-year maturity. The vertical line is March 1.  } 
       \end{minipage}
 \end{figure}
 
@@ -347,61 +293,75 @@ Below, we show the same variables as above, but for different note rates.
 
  In this section, we show the GSE response to the covid crisis. The variables are defined as follows:
 \begin{itemize}
-\item \textbf{Number of Enterprise Bids}: Number of bids per auction submitted by the GSEs (Fannie and Freddie).
+% \item \textbf{Number of Enterprise Bids}: Number of bids per auction submitted by the GSEs (Fannie and Freddie).
 \item \textbf{Fraction of loans sold to GSE}: Fraction of loans sold to the GSEs.
 \end{itemize}
 
 \begin{figure}[h]
   \centering
   \begin{subfigure}[b]{0.49\textwidth}
-      \includegraphics[width=0.998\textwidth]{../results/figures/Number of Enterprise Bidders_mean_mat30_loan1_timeseries_nr_1_7.pdf}
-      \caption{Number of Enterprise Bids}
+      \includegraphics[width=0.998\textwidth]{../results/figures/sold_GSE_mean_mat30_loan1_timeseries_nrmonthly_2.5_4_.pdf}
+      \caption{Fraction loans sold GSE in OB. }
      \end{subfigure}
      \begin{subfigure}[b]{0.49\textwidth}
-      \includegraphics[width=0.998\textwidth]{../results/figures/sold_FreddieBid_mean_mat30_loan1_timeseries_nr_1_7.pdf}
-      \caption{ Fraction of loans sold to GSE}
+      \includegraphics[width=0.998\textwidth]{../results/figures/sold_FreddieBid_mean_mat30_loan1_timeseries_nrmonthly_2.5_4_.pdf}
+      \caption{ Fraction of loans sold to GSE by enterprise. }
      \end{subfigure}
      \caption{OB auction  GSE response. } 
    \begin{minipage}{\textwidth}
-      \footnotesize{\textit{Notes:} The figure shows time series of auction outcomes for Conforming loans with a 30-year maturity. The vertical lines is March 1.  } 
+      \footnotesize{\textit{Notes:} The figure shows time series of auction outcomes for Conforming loans with a 30-year maturity. The vertical line is March 1.  } 
       \end{minipage}
 \end{figure}
 
 
 \pagebreak
-\subsubsection{Comparison of note rates}
+\subsubsection{Comparison GSE vs non-GSE}
+
+Now we compare the highest bids of the auctions when the GSE is the committed investor and when the GSE is not the committed investor. More formally, we define: 
+
+\begin{itemize}
+  \item \textbf{auction transaction: } One of the non-GSE participants is the committed investor and the bid is in the sample. For 52 \% of the transactions, a non-GSE is the committed investor, and 7 \% of the time the bid is not in the sample. These observations are eliminated from the analysis.
+  \item \textbf{cash window transaction: } The GSE is the committed investor. These are 48 \% of the transactions. All highest bids are included in the analysis. 
+\end{itemize}
+
+See ideally, we will plot the accepted bids, but these are not always in the data. Actually, 27 \% of auctions for this type of loan do not have the committer investors bid (70 \%  of times the bid is not in sample the GSE is the committed investor). 
 
 \begin{figure}[h]
   \centering
-  \begin{subfigure}[b]{0.49\textwidth}
-      \includegraphics[width=0.998\textwidth]{../results/figures/Number of Enterprise Bidders_mean_mat30_loan1_timeseries_nr_3_3.75.pdf}
-      \caption{Number of Enterprise Bids}
+     \begin{subfigure}[b]{0.49\textwidth}
+      \includegraphics[width=0.998\textwidth]{../results/figures/LoanAmount_sum_mat30_loan1_timeseries_cpmonthly_2.5_4_auction.pdf}
+      \caption{Loan amount auction.}
+     \end{subfigure}
+      \begin{subfigure}[b]{0.49\textwidth}
+        \includegraphics[width=0.998\textwidth]{../results/figures/LoanAmount_sum_mat30_loan1_timeseries_cpmonthly_2.5_4_cash_window.pdf}
+        \caption{Loan amount cash window.}
+        \end{subfigure}
+     \begin{subfigure}[b]{0.49\textwidth}
+      \includegraphics[width=0.998\textwidth]{../results/figures/winner_bid_mean_mat30_loan1_timeseries_cpmonthly_2.5_4_auction_netbid.pdf}
+      \caption{ Mean of highest net bid auction.}
      \end{subfigure}
      \begin{subfigure}[b]{0.49\textwidth}
-      \includegraphics[width=0.998\textwidth]{../results/figures/sold_FreddieBid_mean_mat30_loan1_timeseries_nr_3_3.75.pdf}
-      \caption{ Fraction of loans sold to GSE}
+      \includegraphics[width=0.998\textwidth]{../results/figures/winner_bid_mean_mat30_loan1_timeseries_cpmonthly_2.5_4_cash_window_netbid.pdf}
+      \caption{ Mean of highest net bid cash window.}
      \end{subfigure}
-     \caption{OB auction  GSE response for note rates between 3\% and 3.75\%. } 
+     \begin{subfigure}[b]{0.49\textwidth}
+      \includegraphics[width=0.998\textwidth]{../results/figures/winner_bid_mean_mat30_loan1_timeseries_cpmonthly_2.5_4_cash_window_netbid.pdf}
+      \caption{ Mean of highest net bid auction.}
+     \end{subfigure}
+     \begin{subfigure}[b]{0.49\textwidth}
+      \includegraphics[width=0.998\textwidth]{../results/figures/winner_bid_median_mat30_loan1_timeseries_cpmonthly_2.5_4_cash_window_netbid.pdf}
+      \caption{ Median of highest net cash window..}
+     \end{subfigure}
+      % \begin{subfigure}
+      %   \includegraphics[width=0.998\textwidth]{../results/figures/winner_bid_median_mat30_loan1_timeseries_cpmonthly_2.5_4_cash_window_netbid.pdf}
+      %   \caption{ Median of highest net bid cash window.}
+      %   \end{subfigure}
+   \caption{OB auction outcomes. } 
    \begin{minipage}{\textwidth}
-      \footnotesize{\textit{Notes:} The figure shows time series of auction outcomes for Conforming loans with a 30-year maturity. The vertical lines is March 1.  } 
+      \footnotesize{\textit{Notes:} The figure shows the time series of auction outcomes for Conforming loans with a 30-year maturity.  The vertical line is March 1. The net bid is calculated by subtracting the TBA Bloomberg price for the same coupon and two forward months from the OB auction price. }
       \end{minipage}
 \end{figure}
 
-\begin{figure}[h]
-  \centering
-  \begin{subfigure}[b]{0.49\textwidth}
-      \includegraphics[width=0.998\textwidth]{../results/figures/Number of Enterprise Bidders_mean_mat30_loan1_timeseries_nr_4_4.75.pdf}
-      \caption{Number of Enterprise Bids}
-     \end{subfigure}
-     \begin{subfigure}[b]{0.49\textwidth}
-      \includegraphics[width=0.998\textwidth]{../results/figures/sold_FreddieBid_mean_mat30_loan1_timeseries_nr_4_4.75.pdf}
-      \caption{ Fraction of loans sold to GSE}
-     \end{subfigure}
-     \caption{OB auction  GSE response for note rates between 4\% and 4.75\%. }  
-   \begin{minipage}{\textwidth}
-      \footnotesize{\textit{Notes:} The figure shows the time series of auction outcomes for Conforming loans with a 30-year maturity. The vertical lines is March 1.  } 
-      \end{minipage}
-\end{figure}
 
 
 
