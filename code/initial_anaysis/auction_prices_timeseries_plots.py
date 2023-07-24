@@ -246,10 +246,13 @@ def plot(df, var, maturity, initial_stat = "Mean",
             df_.sort_values(vartime, inplace=True)
             if normalization_var != '':
                 df_[var] = df_[var] -  df_[normalization_var]
-            ax.plot(df_[vartime], df_[var], label = f'{varrate} {coupon}', alpha = 0.8) # color = color, 
+            ax.plot(df_[vartime], df_[var], label = f'{varrate} {coupon}', alpha = 0.8, linewidth=2.0) # color = color, 
+
+            # horizontal line at zero
+            ax.axhline(y=0, color='black', linestyle='--', linewidth=1, alpha = 0.5, label = None)
     else: 
         df.sort_values(vartime, inplace=True)
-        ax.plot(df[vartime], df[var], color = color, label = legendlabel, alpha = 0.8)
+        ax.plot(df[vartime], df[var], color = color, label = legendlabel, alpha = 0.8, linewidth=2.0) # color = color,
 
     # x axis labels, only 10 dates
     # ax.set_xticks(df[vartime][::int(len(df)/12)])
@@ -669,7 +672,11 @@ if __name__ == '__main__':
                 initial_stat = "(mean)", legend=True, filenameend=aucttype + '_netbid')
 
     # %%
-    var = 'winner_bid_mean'
+    # ts_ob_bl_collapsed
+    f, a = plot(ts_ob_bl_collapsed, var, normalization_var= 'PX_Last', maturity = maturity,
+                initial_stat = "(mean)", legend=True, filenameend= '_netbid')
+
+    # %%
     f, a = plot(ts_ob_bl_1, var, maturity = maturity,
             initial_stat = "(mean)", legend=True, filenameend=aucttype )
 
@@ -678,6 +685,11 @@ if __name__ == '__main__':
     var = 'winner_bid_median'
     f, a = plot(ts_ob_bl_1, var, normalization_var= 'PX_Last', maturity = maturity,
                 initial_stat = "(median)", legend=True, filenameend=aucttype + '_netbid')
+    
+    # %%
+
+    f, a = plot(ts_ob_bl_collapsed, var, normalization_var= 'PX_Last', maturity = maturity,
+                initial_stat = "(median)", legend=True, filenameend='_netbid')
     
     # %%
     # * days to auction
