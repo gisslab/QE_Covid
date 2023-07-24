@@ -754,7 +754,7 @@ if __name__ == '__main__':
     # %% 
     # * sold GSE
     plot(df_ts_month, 'sold_GSE_mean', maturity, initial_stat = "fraction sold GSE", empty_label = True, 
-                color = 'tab:blue', save=False, varrate = '')
+                color = 'tab:blue', save=True, varrate = '')
     
     
     # %%
@@ -766,7 +766,7 @@ if __name__ == '__main__':
     # # * std
 
     # var = 'winner_bid_std'
-    # plot(ts, var, maturity, initial_stat = "Std")
+    # plot(ts, var, maturity, initial_stat = "Std")add 
 
     # # %%
     # # * coeff var
