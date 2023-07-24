@@ -636,7 +636,7 @@ if __name__ == '__main__':
     # %%
 
     # * filter by auction type
-    aucttype = 'cash_window'
+    aucttype = 'auction' #'cash_window' 
     ts_ob_bl_1 = ts_ob_bl[ts_ob_bl['auction_type'] == aucttype]
 
     # %% 
@@ -698,6 +698,9 @@ if __name__ == '__main__':
                 initial_stat = "Days to auction", legend=True, 
                 filenameend=aucttype,  empty_label = True)
 
+    plot(df_ts_month, var, maturity, varrate = '', 
+            initial_stat = "Days to auction", empty_label = True, legend = True)
+
 
     # %%
     # # * dummy sell any
@@ -709,15 +712,18 @@ if __name__ == '__main__':
     var = 'dummy_sell_winner_mean'
     plot(ts_ob_bl_1, var, maturity, initial_stat = "Rate sell to winner", empty_label = True, filenameend=aucttype, legend = True)
 
+    plot(df_ts_month, var, maturity, varrate = '', initial_stat = "Rate sell to winner", empty_label = True, legend = True)
+
     # %%
     # * number of participants
     var = 'Number of Participants_mean'
     plot(ts_ob_bl_1, var, maturity, initial_stat = "Number of participants", empty_label = True, legend = True)
 
+    plot(df_ts_month, var, maturity, varrate = '', initial_stat = "Number of participants", empty_label = True, legend = True)
+
     # %%
     
     # * number of enterprise bidders
-    #! maybe this makes more sense for all bids not only auction type, not separate coupons
     var = 'Number of Enterprise Bidders_mean' 
     plot(df_ts_month, var, maturity, varrate = '',initial_stat = "Number of enterprise bidders",
             empty_label = True,        
@@ -725,15 +731,16 @@ if __name__ == '__main__':
 
     # %%
     # * number of bulk bidders
-    #! maybe this makes more sense for all bids not only auction type, not separate coupons
     var = 'Number of Bulk Bidders_mean'
-    plot(df_ts_month, var, maturity, varrate = '', initial_stat = "Number of bulk bidders", empty_label = True, save = False)
+    plot(df_ts_month, var, maturity, varrate = '', initial_stat = "Number of bulk bidders", empty_label = True, save = True)
 
     # %%
     # * bulk bidders fraction
-    #! maybe this makes more sense for all bids not only auction type, not separate coupons
+
     var = 'bulk_bidders_fraction_mean'
-    plot(df_ts_month, var, maturity,  varrate = '', initial_stat = "Bulk bidders fraction", empty_label = True, save = False)
+    plot(df_ts_month, var, maturity,  varrate = '', initial_stat = "Bulk bidders fraction", empty_label = True, save = True)
+
+    
 
     # %%
     # * Enterprise sold
@@ -778,6 +785,7 @@ if __name__ == '__main__':
     
 
     # ******** Table Auctions ******** #
+    
     # # %% 
     plot(df_ts_month, 'sold_GSE_mean', maturity, initial_stat = "fraction sold GSE", empty_label = True, 
                 color = 'tab:blue', save=False, varrate = '')
