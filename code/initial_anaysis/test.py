@@ -12,6 +12,8 @@ auction_save_folder = '/project/houde/mortgages/data/intermediate/ob_auctions'
 #%%
 # read f'{auction_save_folder}/combined_auctions_jan2018-jul2022_cleaned.csv'
 
+
+# *********************************************************************************************
 ### * Auction data testing * ###
 
 
@@ -108,6 +110,8 @@ for col in df_auc.columns[41:62]:
 # %%
 
 
+# *********************************************************************************************
+
 ### * blomberg data testing * ###
 
 bl_data_folder = '/project/houde/mortgages/QE_Covid/data/data_TBA/bloomberg/'
@@ -138,3 +142,41 @@ df_bl_2020.Ticker.value_counts()
 # %%
 df_bl_2020.Forward_Trading_Months.value_counts()
 # %%
+
+
+# *********************************************************************************************
+### * Testing of Combined MBS OB file (erased) ###
+
+# %%
+
+ob_hmda_orig_folder = '/project/houde/mortgages/QE_Covid/data/data_auction/clean_data/hmda-ob-mbs_origination_data_apr2023.dta'
+
+# %%
+
+# large file, read only 100000 rows
+
+df_ob_hmda_orig = pd.read_stata(ob_hmda_orig_folder, chunksize=100000, iterator=True) #, chunksize=100000
+
+
+# %%
+df = df_ob_hmda_orig.get_chunk(100000)
+# %%
+
+df.info()
+
+# %%   
+# print columns by 30 
+for col in df.columns[0:30]:
+    print(col, " - ", df.loc[0,col])
+
+# %%
+for col in df.columns[31:60]:
+    print(col, " - ", df.loc[0,col])
+
+# %%
+for col in df.columns[61:90]:
+    print(col, " - ", df.loc[0,col])
+
+# %%
+for col in df.columns[91:120]:
+    print(col, " - ", df.loc[0,col])        
