@@ -365,7 +365,7 @@ if __name__ == '__main__':
     plt.xlabel('Forward days (settlement date - trade date)')
     plt.ylabel('Frequency')
     plt.title('Distribution of Bloomberg forward days')
-    plt.savefig(f'{auction_save_folder}/distribution_of_forwarddays_bloomberg.png', dpi=300)
+    plt.savefig(f'{auction_save_folder}/figures/distribution_of_forwarddays_bloomberg.png', dpi=300)
 
     # %%
     # * plot histogram of forward days
@@ -374,7 +374,7 @@ if __name__ == '__main__':
     plt.xlabel('Forward days (settlement date - trade date)')
     plt.ylabel('Frequency')
     plt.title('Distribution of FED auctions forward days (Fannie Mae and Freddie Mac)')
-    plt.savefig(f'{auction_save_folder}/distribution_of_forwarddays_FED.png', dpi=300)
+    plt.savefig(f'{auction_save_folder}/figures/distribution_of_forwarddays_FED.png', dpi=300)
     plt.show()  
 
     # * Plot price and amount by coupon
@@ -425,7 +425,7 @@ if __name__ == '__main__':
     )   
 
     # %%
-    # scatter price by month
+    # **************************** scatter price by month
     # by coupon
     # df_merged_1m = df_merged_1m[df_merged_1m.Coupon.isin([ 4.0])]
 
@@ -444,7 +444,12 @@ if __name__ == '__main__':
 
         i += 1
     
-    
+    plt.subplots_adjust(top=0.925, 
+            bottom=0.20, 
+            left=0.12, 
+            right=0.96, 
+            hspace=0.01, 
+            wspace=0.01)
 
     plt.legend(loc = 'upper right', title = 'Coupon')
     plt.title('Mean price by month')
@@ -452,7 +457,7 @@ if __name__ == '__main__':
     plt.ylabel('Mean price ($)')
     plt.xticks(rotation=45)
 
-    plt.savefig(f'{auction_save_folder}/fed_monthly_price_mean_by_coupon.png', dpi=300)
+    plt.savefig(f'{auction_save_folder}/figures/fed_monthly_price_mean_by_coupon.png', dpi=300)
 
 
 
@@ -516,13 +521,21 @@ if __name__ == '__main__':
                 dict_amount_per_coupon.values(),
                 labels=dict_amount_per_coupon.keys(), alpha=0.7)
     
+    plt.subplots_adjust(top=0.925, 
+                bottom=0.20, 
+                left=0.12, 
+                right=0.96, 
+                hspace=0.01, 
+                wspace=0.01)
+
+    
     ax.legend(loc='upper right',title='Coupon')
     # legend name Coupon
     ax.set_title('Monthly trade amount by coupon')
     ax.set_ylabel('Trade amount (million $)')
     ax.set_xlabel('Year-Month')
     plt.xticks(rotation=45)
-    plt.savefig(f'{auction_save_folder}/fed_monthly_trade_amount_by_coupon.png', dpi=300)
+    plt.savefig(f'{auction_save_folder}/figures/fed_monthly_trade_amount_by_coupon.png', dpi=300)
 
     # ***** End area graph for trade amount by coupon ***** #
 
