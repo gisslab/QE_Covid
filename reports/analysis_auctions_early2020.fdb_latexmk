@@ -1,5 +1,5 @@
 # Fdb version 3
-["pdflatex"] 1690334181 "/Users/gisellelab/Work/QE_Covid/reports/analysis_auctions_early2020.tex" "analysis_auctions_early2020.pdf" "analysis_auctions_early2020" 1690334183
+["pdflatex"] 1690339976 "/Users/gisellelab/Work/QE_Covid/reports/analysis_auctions_early2020.tex" "analysis_auctions_early2020.pdf" "analysis_auctions_early2020" 1690339977
   "../results/figures/DaysToAuction_mean_mat30_loan1_timeseries_nrmonthly_2.5_4_.pdf" 1690329813 10446 055779e4476a56bd2961e53b66038eb8 ""
   "../results/figures/LoanAmount_sum_mat30_loan1_timeseries_cpmonthly_2.5_4_.pdf" 1690329813 10716 ef0e74390c61502e3012a500f44cbfca ""
   "../results/figures/LoanAmount_sum_mat30_loan1_timeseries_cpmonthly_2.5_4_auction.pdf" 1690329813 12400 c51a0d8f06b674e8a5cdbab41f714cc0 ""
@@ -14,6 +14,8 @@
   "../results/figures/fed_price_mean_mat30_loan1_timeseries_cpmonthly_coup2.5.pdf" 1690329813 11938 ec568bf80585de8dc7876e16260c7b1a ""
   "../results/figures/fed_price_mean_mat30_loan1_timeseries_cpmonthly_normalized.pdf" 1690329813 12344 27a25cb65f8bd095e871a0ac6f3c84c3 ""
   "../results/figures/fed_price_mean_mat30_loan1_timeseries_cpmonthly_normalized_coup2.5.pdf" 1690329813 13265 6036821ef74d23591d45ce674f75c9d7 ""
+  "../results/figures/fed_price_mean_mat30_loan1_timeseries_nrmonthly_2.5_4__fed_ob.pdf" 1690339332 15564 dbd5956620e7c7a565db9326531286c4 ""
+  "../results/figures/fed_price_mean_mat30_loan1_timeseries_nrmonthly__normalized_fed_ob.pdf" 1690339332 13802 e3c0721c94f84cea6e2d71969ec8cf20 ""
   "../results/figures/fed_trade_amount_mat30_loan1_timeseries_cpmonthly_coup2.5.pdf" 1690329813 12374 3006a66a7b950cb0fc6ebb97e873a982 ""
   "../results/figures/sold_FreddieBid_mean_mat30_loan1_timeseries_nrmonthly_2.5_4_.pdf" 1690329813 12635 95e810c53a5c4bfad6e2e8f7f214863d ""
   "../results/figures/sold_GSE_mean_mat30_loan1_timeseries_nrmonthly_2.5_4_.pdf" 1690329813 11960 7a0bb61f6c595375d273250396242576 ""
@@ -27,7 +29,7 @@
   "../results/tables/auctions_level_mat30_loan1_all.tex" 1690329813 1034 a2a368cb01317a3db0229c6dd771f41b ""
   "../results/tables/auctions_level_mat30_loan1_jan-feb.tex" 1690329813 750 f811eb8f9f50c8dc3588621707f6d92e ""
   "../results/tables/auctions_level_mat30_loan1_mar-apr.tex" 1690156782 750 514722cbb7751d9943a1721788252dde ""
-  "/Users/gisellelab/Work/QE_Covid/reports/analysis_auctions_early2020.tex" 1690334181 20431 577998fe0088fdccce24e78eb99a3d1f ""
+  "/Users/gisellelab/Work/QE_Covid/reports/analysis_auctions_early2020.tex" 1690339975 21633 b4443baf572ea67c36c13ae2cecbceb9 ""
   "/usr/local/texlive/2022/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc" 1136849721 2900 1537cc8184ad1792082cd229ecc269f4 ""
   "/usr/local/texlive/2022/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/local/texlive/2022/texmf-dist/fonts/tfm/jknappen/ec/tcrm1095.tfm" 1136768653 1536 02c06700a42be0f5a28664c7273f82e7 ""
@@ -129,9 +131,9 @@
   "/usr/local/texlive/2022/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1647878959 4410336 7d30a02e9fa9a16d7d1f8d037ba69641 ""
   "/usr/local/texlive/2022/texmf-var/web2c/pdftex/pdflatex.fmt" 1652674088 2826452 4f53d9de205f8f0a7dd505b85fa7118e ""
   "/usr/local/texlive/2022/texmf.cnf" 1647878952 577 209b46be99c9075fd74d4c0369380e8c ""
-  "analysis_auctions_early2020.aux" 1690334182 4259 dcce21012765b4b4f4af1c90bbb63ead "pdflatex"
-  "analysis_auctions_early2020.out" 1690334182 1596 ed706b0fb71b4f2996c092c2427a8a02 "pdflatex"
-  "analysis_auctions_early2020.tex" 1690334181 20431 577998fe0088fdccce24e78eb99a3d1f ""
+  "analysis_auctions_early2020.aux" 1690339977 4616 2d1ddc45d0f079590ede6ee81b06c6fe "pdflatex"
+  "analysis_auctions_early2020.out" 1690339977 1776 18242e1721d5e12222aa45efa0347b29 "pdflatex"
+  "analysis_auctions_early2020.tex" 1690339975 21633 b4443baf572ea67c36c13ae2cecbceb9 ""
   (generated)
   "analysis_auctions_early2020.aux"
   "analysis_auctions_early2020.log"

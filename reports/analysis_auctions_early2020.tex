@@ -350,7 +350,7 @@ Now we compare the highest bids of the auctions when the GSE is the committed in
 
 See ideally, we will plot the accepted bids, but these are not always in the data. Actually, 27 \% of auctions for this type of loan do not have the committer investors bid (70 \%  of times the bid is not in sample the GSE is the committed investor). 
 
-\begin{figure}[h]
+\begin{figure}[]
   \centering
      \begin{subfigure}[b]{0.49\textwidth}
       \includegraphics[width=0.998\textwidth]{../results/figures/LoanAmount_sum_mat30_loan1_timeseries_cpmonthly_2.5_4_auction.pdf}
@@ -386,6 +386,30 @@ See ideally, we will plot the accepted bids, but these are not always in the dat
       \end{minipage}
 \end{figure}
 
+
+\pagebreak
+
+
+  \section{FED and Ob auction prices}
+
+  In order to compare the FED and OB auction prices, we need to match the FED purchases with the OB auctions. We do this by matching coupon and trade date. We plot only Coupon 2.5 since it is the most traded coupon. The Bloomberg TBA price is one month forward.
+
+
+\begin{figure}[h]
+    \centering
+    \begin{subfigure}[b]{0.49\textwidth}
+      \includegraphics[width=0.998\textwidth]{../results/figures/fed_price_mean_mat30_loan1_timeseries_nrmonthly_2.5_4__fed_ob}
+      \caption{Price date}
+     \end{subfigure}
+     \begin{subfigure}[b]{0.49\textwidth}
+      \includegraphics[width=0.998\textwidth]{../results/figures/fed_price_mean_mat30_loan1_timeseries_nrmonthly__normalized_fed_ob}
+      \caption{Net price}
+     \end{subfigure}
+     \caption{Fed and OB auction prices for coupon 2.5 and 30-year maturity, TBA Bloomberg price is one month forward. } 
+     \begin{minipage}{\textwidth}
+      \footnotesize{\textit{Notes:} The figure shows the monthly time series of trade amounts and prices of FED  purchases of Fanny Mae and Fredy Mac products and 30-year maturity and Ob prices. Coupon selected is 2.5. } 
+        \end{minipage}
+\end{figure}
 
 
 

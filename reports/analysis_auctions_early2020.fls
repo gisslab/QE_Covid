@@ -776,6 +776,14 @@ INPUT ../results/figures/winner_bid_median_mat30_loan1_timeseries_cpmonthly_2.5_
 INPUT ../results/figures/winner_bid_median_mat30_loan1_timeseries_cpmonthly_2.5_4_cash_window_netbid.pdf
 INPUT ../results/figures/winner_bid_median_mat30_loan1_timeseries_cpmonthly_2.5_4_cash_window_netbid.pdf
 INPUT ../results/figures/winner_bid_median_mat30_loan1_timeseries_cpmonthly_2.5_4_cash_window_netbid.pdf
+INPUT ../results/figures/fed_price_mean_mat30_loan1_timeseries_nrmonthly_2.5_4__fed_ob.pdf
+INPUT ../results/figures/fed_price_mean_mat30_loan1_timeseries_nrmonthly_2.5_4__fed_ob.pdf
+INPUT ../results/figures/fed_price_mean_mat30_loan1_timeseries_nrmonthly_2.5_4__fed_ob.pdf
+INPUT ../results/figures/fed_price_mean_mat30_loan1_timeseries_nrmonthly_2.5_4__fed_ob.pdf
+INPUT ../results/figures/fed_price_mean_mat30_loan1_timeseries_nrmonthly__normalized_fed_ob.pdf
+INPUT ../results/figures/fed_price_mean_mat30_loan1_timeseries_nrmonthly__normalized_fed_ob.pdf
+INPUT ../results/figures/fed_price_mean_mat30_loan1_timeseries_nrmonthly__normalized_fed_ob.pdf
+INPUT ../results/figures/fed_price_mean_mat30_loan1_timeseries_nrmonthly__normalized_fed_ob.pdf
 INPUT analysis_auctions_early2020.aux
 INPUT ./analysis_auctions_early2020.out
 INPUT ./analysis_auctions_early2020.out
