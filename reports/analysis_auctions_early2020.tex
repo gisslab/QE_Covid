@@ -52,7 +52,7 @@
 \section{FED purchases of MBS}
 
 The following figures show the daily time series of amounts and prices of FED purchases of MBAs for Fannie Mae and Freddie Mac
- products and 30-year maturity in the early COVID period. We plot by month the total amount by coupon and the mean price. If it only shows a dot is because there is only one month of data for that coupon. The period is January 2020 to April 2021. 
+ products and 30-year maturity in the early COVID period. We plot by month the total amount by coupon and the mean price. If it only shows a dot is because there is only one month of data for that coupon. The period is January 2020 to April 2021. The prices and quantities are aggregated monthly by trade date. 
 
 
 \begin{figure}[h]
@@ -67,28 +67,35 @@ The following figures show the daily time series of amounts and prices of FED pu
      \end{subfigure}
      \caption{FED purchases of Fannie Mae and Freddie Mac MBS securities  in the early COVID period} 
      \begin{minipage}{\textwidth}
-        \footnotesize{\textit{Notes:} The figure shows the daily time series of amounts and prices of FED purchases of FNMA products and 30-year maturity. Colors represent different coupons. } 
+      \footnotesize{\textit{Notes:} The figure shows the monthly time series of trade amounts and prices of FED purchases of Fanny Mae and Fredy Mac products and 30-year maturity. Colors represent different coupons. } 
         \end{minipage}
 \end{figure}
 
 \pagebreak
 
-Now, we choose the Coupon 2.5 that was traded in the majority of periods and plot the daily time series prices  of FED purchases of the same product. The right panel shows the daily time series of prices normalized by the Bloomberg TBA price.  The net price is then calculated as the difference between the FED price and the TBA price. This is only for FED purchases that we categorized as one month forward\footnote{$x$ months forward is defined as when the trade date is between $x$ months and $x+1$ month before the settlement date.}
-and their respective TBA price.
+Now, we choose coupon 2.5 which was traded in the majority of periods, and plot the daily time series prices of FED purchases of the same product. Panel (c) shows the daily time series of prices normalized by the Bloomberg TBA price.  The net price is then calculated as the difference between the FED price and the TBA price. This is only for FED purchases that we categorized as one-month forward\footnote{$x$ months forward is defined as when the trade date is between $x$ months and $x+1$ month before the settlement date.} One month forward was chosen since it is the most common forward period for FED purchases. 
 
 \begin{figure}[h]
   \centering
   \begin{subfigure}[b]{0.49\textwidth}
+    \includegraphics[width=0.998\textwidth]{../results/figures/fed_trade_amount_mat30_loan1_timeseries_cpmonthly_coup2.5}
+    \caption{ Quantity }
+    \end{subfigure}
+  \begin{subfigure}[b]{0.49\textwidth}
     \includegraphics[width=0.998\textwidth]{../results/figures/fed_price_mean_mat30_loan1_timeseries_cpmonthly_coup2.5}
-    \caption{ Price at trade date (monthly)}
+    \caption{ Price }
    \end{subfigure}
    \begin{subfigure}[b]{0.49\textwidth}
     \includegraphics[width=0.998\textwidth]{../results/figures/fed_price_mean_mat30_loan1_timeseries_cpmonthly_normalized_coup2.5}
-    \caption{ Net price at trade date (monthly)}
+    \caption{ Net price}
+   \end{subfigure}
+   \begin{subfigure}[b]{0.49\textwidth}
+    \includegraphics[width=0.998\textwidth]{../results/figures/fed_price_mean_mat30_loan1_timeseries_cpmonthly_normalized}
+    \caption{ Comparison of coupons net price }
    \end{subfigure}
    \caption{FED purchases of Fannie Mae and Freddie Mac MBS securities  in the early COVID period} 
    \begin{minipage}{\textwidth}
-      \footnotesize{\textit{Notes:} The figure shows the daily time series of amounts and prices of FED purchases of FNMA products and 30-year maturity. Colors represent different coupons. } 
+      \footnotesize{\textit{Notes:} The figure shows the monthly time series of trade amounts and prices of FED purchases of Fanny Mae and Fredy Mac products and 30-year maturity. Colors represent different coupons. } 
       \end{minipage}
 \end{figure}
 
@@ -112,7 +119,7 @@ The product is Conforming loans with a 30-year maturity.
         \end{minipage}
 \end{figure}
 
-This figure shows a histogram for the note rates by auction for the same period and product.
+This figure shows a histogram of the note rates by auction for the same period and product.
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.62\textwidth]{../results/figures/distribution_of_noterates.png}
@@ -163,12 +170,12 @@ A similar table is depicted for the months of January and February and for the m
 \end{table}
 
 \pagebreak
-\section{OB Auctions in the Early Covid Period: Time Series analysis}
+\section{OB Auctions: Time Series analysis}
 
 This section includes a time series analysis of the OB auctions in the early COVID period. The analysis is done at the monthly level. The product is Conforming loans with a 30-year maturity. It includes the price and quantities of the auctions, as well as the number of auctions per period. Next, distress signs are explored by looking at the number of participants, the number of bids, and the number of bulk bids. Finally, the GSEs' response is by plotting the number of bids by the GSE and the number of auctions won by GSEs.
 % In all cases, the analysis includes a comparison between note rates around 3 - 3.75\% and note rates around 4 - 4.75\%.
 
-To analyze the OB auctions, we merge track each loan that was auctioned to know the MBS to which the loan was eventually pool. Then each loan is matched with an MBS coupon. The matched rate was around 95 \%. Below, we can see the summary of the number of loans per coupon and statistics about the note rates that were pooled in each coupon. 
+To analyze the OB auctions, we merge track each loan that was auctioned to know the MBS to which the loan was eventually pooled. Then each loan is matched with an MBS coupon. The matched rate was around 95 \%. Below, we can see the summary of the number of loans per coupon and statistics about the note rates that were pooled in each coupon. 
 
 
 \begin{table}[h]

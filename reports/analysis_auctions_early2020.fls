@@ -652,6 +652,10 @@ INPUT /usr/local/texlive/2022/texmf-dist/fonts/tfm/public/cm/cmsy10.tfm
 INPUT /usr/local/texlive/2022/texmf-var/fonts/map/pdftex/updmap/pdftex.map
 INPUT /usr/local/texlive/2022/texmf-dist/fonts/tfm/public/cm/cmmi9.tfm
 INPUT /usr/local/texlive/2022/texmf-dist/fonts/tfm/public/cm/cmsy9.tfm
+INPUT ../results/figures/fed_trade_amount_mat30_loan1_timeseries_cpmonthly_coup2.5.pdf
+INPUT ../results/figures/fed_trade_amount_mat30_loan1_timeseries_cpmonthly_coup2.5.pdf
+INPUT ../results/figures/fed_trade_amount_mat30_loan1_timeseries_cpmonthly_coup2.5.pdf
+INPUT ../results/figures/fed_trade_amount_mat30_loan1_timeseries_cpmonthly_coup2.5.pdf
 INPUT ../results/figures/fed_price_mean_mat30_loan1_timeseries_cpmonthly_coup2.5.pdf
 INPUT ../results/figures/fed_price_mean_mat30_loan1_timeseries_cpmonthly_coup2.5.pdf
 INPUT ../results/figures/fed_price_mean_mat30_loan1_timeseries_cpmonthly_coup2.5.pdf
@@ -660,6 +664,10 @@ INPUT ../results/figures/fed_price_mean_mat30_loan1_timeseries_cpmonthly_normali
 INPUT ../results/figures/fed_price_mean_mat30_loan1_timeseries_cpmonthly_normalized_coup2.5.pdf
 INPUT ../results/figures/fed_price_mean_mat30_loan1_timeseries_cpmonthly_normalized_coup2.5.pdf
 INPUT ../results/figures/fed_price_mean_mat30_loan1_timeseries_cpmonthly_normalized_coup2.5.pdf
+INPUT ../results/figures/fed_price_mean_mat30_loan1_timeseries_cpmonthly_normalized.pdf
+INPUT ../results/figures/fed_price_mean_mat30_loan1_timeseries_cpmonthly_normalized.pdf
+INPUT ../results/figures/fed_price_mean_mat30_loan1_timeseries_cpmonthly_normalized.pdf
+INPUT ../results/figures/fed_price_mean_mat30_loan1_timeseries_cpmonthly_normalized.pdf
 INPUT ../results/figures/distribution_of_bids.png
 INPUT ../results/figures/distribution_of_bids.png
 INPUT ../results/figures/distribution_of_bids.png
