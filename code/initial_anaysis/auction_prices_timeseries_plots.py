@@ -2,7 +2,9 @@
 Created on Thu June 1, 2023
 @author: Giselle Labrador Badia (@gisslab)
 
-This module is used to analyze the auction prices data from the OB (Optimal Blue) bid evel data data. 
+This module is used to analyze the auction prices data from the OB (Optimal Blue) bid evel data data.
+
+Includes functions to read and clean Bloomberg TBA price data.
 
 input: 
      file : csv file with the auction prices data time series. 
@@ -29,6 +31,8 @@ import auction_prices_analysis as ap
 
 # * settings
 
+#TODO: Nicer modulee to manage paths
+
 auction_data_folder = '/project/houde/mortgages/QE_Covid/data/data_auction/clean_data'
 
 auction_save_folder = '/project/houde/mortgages/QE_Covid/results/figures'
@@ -37,7 +41,9 @@ table_folder = '/project/houde/mortgages/QE_Covid/results/tables'
 
 auction_filename = 'combined_auctions_jan2018-jul2022_cleaned'
 
-bl_data_folder = '/project/houde/mortgages/QE_Covid/data/data_TBA/bloomberg/'
+bl_data_folder = '/project/houde/mortgages/QE_Covid/data/data_TBA/bloomberg/clean_data/'
+
+bloomberg_filename = 'bloomberg_daily_trading_prices' # bloomberg_daily_trading_prices_w_forwards
 
 
 maturity = 30
@@ -47,6 +53,8 @@ loantype = 1
 """ Type of the auctioned loans. 1 = Conforming"""
 
 collapsed_note_rate_list = [2.5, 3, 3.75, 4.25, 4.5,  5,  5.5,  6]
+
+interval = (2.5,4) # Coupons ot note rate
 
 #%%
 
@@ -86,6 +94,8 @@ def tide_auction_data(df,
 
     df = df[ (df[vartime] >= pd.to_datetime(min_date)) & (df[vartime] < pd.to_datetime(max_date)) ]
 
+    #Convert Loan Amount to millions, it is in thousands
+    df['LoanAmount_sum'] = df['LoanAmount_sum']/(10**3)
     # rename to Trading_Date to plot with the TBA data
     df = df.rename(columns = { 
                                 # vartime: 'Trading_Date'
@@ -108,16 +118,27 @@ def tide_auction_data(df,
     return df
 
 
-def tide_collapse_bloomberg_data(df_, interval,
+def tide_collapse_bloomberg_data(df_, 
+                                interval = (1,7), # coupon range
                                 min_date = '2020-01-01', max_date = '2021-12-31', #'2020-05-01'
                                 tickers = ['FNCL', 'FGLMC'],
                                 service_fee = 0.75,
                                 group_by = ['FirstMonthYear', 'Coupon'], #Trading_Date
                                 bycoupon = True,
-                                forward_months = 2,
+                                forward_months = [2],
                                 ):
     """
-    Receives bloomberg data daily cleaned and returns cleaner time series data ready to be used in plot function.
+    Receives bloomberg data daily cleaned and returns cleaner time series at the monthly/daily level (specified in group_by).
+
+    df_ : dataframe with bloomberg data.
+    interval : tuple with coupon.
+    min_date : minimum date to filter the data.
+    max_date : maximum date to filter the data.
+    tickers : list of tickers to filter the data (FNC, FGLMC, GNMA).
+    service_fee : service fee to be substracted from the note rate, only when bycoupon = False.
+    group_by : list of variables to group by, usually one time and one coupon, e.g., ['FirstMonthYear', 'Coupon'].
+    bycoupon : boolean, if True filter by coupon, if False filter assuming interval is note rate (note rate - service_fee).
+    forward_months : number of months forward to filter the data.
     """
     df = df_.copy()
 
@@ -133,7 +154,7 @@ def tide_collapse_bloomberg_data(df_, interval,
     print("Coupons in range: ", df['Coupon'].unique())
 
     # filter by forward months
-    df = df.loc[df['Forward_Trading_Months'] == forward_months, :]
+    # df = df.loc[df['Forward_Trading_Months'].isin(forward_months), :]
 
     # # ? ticker FNCL and maybe FGLMC
     df = df[df['Ticker'].isin(tickers)]
@@ -215,8 +236,11 @@ def filter_bins_rates(df, min_rate, max_rate):
     return df
 
 
-def plot(df, var, maturity, initial_stat = "Mean",
+def plot(df, var, 
+          maturity = 30, 
+          initial_stat = "Mean",
           vertical_lines = ["2020-03-01"], #["2020-03-01","2020-04-01", "2020-04-15"],
+          horizontal_lines = [0],
           fig = None, ax = None, color = 'tab:blue',
           save = True, 
           empty_label = False,
@@ -225,10 +249,15 @@ def plot(df, var, maturity, initial_stat = "Mean",
           vartime = 'FirstMonthYear', #'CommittedDate', # ,
           varrate = 'Coupon',
           filenameend = '',
-          normalization_var = '' #'PX_Last'
+          normalization_var = '', #'PX_Last',
+          interval = interval,
           ):
     """
-    This function plots the time series of the variable var.
+    Plots the time series of the variable var (y axis) by varrate where vartime is the x axis and varrate is the color.
+
+    df : dataframe with the data to plot.
+    var : variable to plot.
+    initial_stat : Label that goes in title and ylabel.
     """
     agglevel = 'daily' if vartime == 'Trading_Date' else 'monthly'
     agglevel = 'cp' + agglevel if varrate == 'Coupon' else 'nr' + agglevel
@@ -246,13 +275,16 @@ def plot(df, var, maturity, initial_stat = "Mean",
             df_.sort_values(vartime, inplace=True)
             if normalization_var != '':
                 df_[var] = df_[var] -  df_[normalization_var]
-            ax.plot(df_[vartime], df_[var], label = f'{varrate} {coupon}', alpha = 0.8, linewidth=2.0) # color = color, 
+            ax.plot(df_[vartime], df_[var], label = f'{coupon}', alpha = 0.8, linewidth=2.0) # color = color, 
 
-            # horizontal line at zero
-            ax.axhline(y=0, color='black', linestyle='--', linewidth=1, alpha = 0.5, label = None)
+
     else: 
         df.sort_values(vartime, inplace=True)
         ax.plot(df[vartime], df[var], color = color, label = legendlabel, alpha = 0.8, linewidth=2.0) # color = color,
+
+    # add horizontal lines
+    for hl in horizontal_lines:
+        ax.axhline(y=hl, color='black', linestyle='--', linewidth=1, alpha = 0.5, label = None)
 
     # x axis labels, only 10 dates
     # ax.set_xticks(df[vartime][::int(len(df)/12)])
@@ -276,10 +308,15 @@ def plot(df, var, maturity, initial_stat = "Mean",
         plt.axvline(x=pd.to_datetime(vl), color='r', linestyle='--', linewidth=1, alpha = 0.7, label = None)
 
     if legend:
-        plt.legend(loc="upper right")
+        plt.legend(loc="upper right", title = varrate)
 
     if save:
-        fig.savefig(f'{auction_save_folder}/{var}_mat{maturity}_loan{loantype}_timeseries_{agglevel}_{interval[0]}_{interval[1]}_{filenameend}.pdf')
+        # if var interval variable exists
+        if interval != None: 
+            intervals = f'{interval[0]}_{interval[1]}_'
+        else: intervals = ''
+
+        fig.savefig(f'{auction_save_folder}/{var}_mat{maturity}_loan{loantype}_timeseries_{agglevel}_{intervals}{filenameend}.pdf')
 
     return fig, ax
 
@@ -511,7 +548,7 @@ if __name__ == '__main__':
 
     
     # %%
-    # ************* Data ************* #
+    # *********************************** Data ********************************* #
 
     """
     Number of observations:  338
@@ -524,7 +561,7 @@ if __name__ == '__main__':
     Saving data to:  /project/houde/mortgages/QE_Covid/data/data_auction/clean_data/timeseries/combined_auctions_jan2018-jul2022_cleaned_mat30_loan1_timeseries_MonthYear.csv
     """
 
-    # * auction OB data
+    # ******************************* auction OB data ********************************** #
 
     var_time = 'MonthYear'
     var_rate = 's_coupon'
@@ -567,9 +604,6 @@ if __name__ == '__main__':
     df_ts_month = read_data(file = f'timeseries/{filename_timeseries_month}',
                                 path = auction_data_folder,
                                 datetime_vars=['FirstMonthYear'])
-
-
-
     
     # %%
     df_ts.columns
@@ -592,29 +626,31 @@ if __name__ == '__main__':
     # ts_all_agg = filter_bins_rates(ts_all, min_rate = interval[0], max_rate = interval[1])
     # %%
 
-    # * bloomberg data
+    # *************************** bloomberg data ********************************** #
 
     # bloomberg_daily_trading_prices_w_forwards bloomberg_daily_trading_prices
 
-    df_bl = read_data(file = 'bloomberg_daily_trading_prices', path = f'{bl_data_folder}/clean_data/', datetime_vars=['Trading_Date', 'Settlement_Date'])
+    df_bl = read_data(file = bloomberg_filename, 
+                      path = bl_data_folder, 
+                      datetime_vars=['Trading_Date', 'Settlement_Date'])
     df_bl.head()
 
     # %%
-    df_bl_2020 = tide_collapse_bloomberg_data(df_bl, interval= interval)
+    df_bl_2020 = tide_collapse_bloomberg_data(df_bl, 
+                                              interval= interval,
+                                              forward_months = [1, 2])
     df_bl_2020.head()
     # 0 Coupons in range:  [2.5 3.  3.5 4.  4.5 5.  5.5 6.  6.5]
     # 3 [2.5 3.  3.5]
     # 5 Coupons in range:  [3.5 4.  4.5]
-    
+    # %%
     df_bl_2020_ts = tide_collapse_bloomberg_data(df_bl, interval= interval, group_by=['FirstMonthYear'])
-
 
     # # %%
     # # only when is aggregated by note rate
     # df_tba = build_values_note_rate_from_TBA(df_tba = df_bl_2020,
     #                                 df_noterate_timeseries = ts_all,
     #                                 interval = interval)
-    
     # df_tba.head()
     # # %%
     # df_tba.value_note_rate.describe()
@@ -623,7 +659,7 @@ if __name__ == '__main__':
     # df_tba.value_note_rate.isna().sum()
 
     # %%
-    # * merge OB and BL data
+    # *********************** merge OB and BL data ********************************** #
 
     ts_ob_bl = merge_bl_ob(df_bl_2020, ts_all)
 
@@ -640,7 +676,7 @@ if __name__ == '__main__':
     ts_ob_bl_1 = ts_ob_bl[ts_ob_bl['auction_type'] == aucttype]
 
     # %% 
-    # ******** Plots ******** #
+    # ***************************** Plots ******************************************* #
 
 
     # %%
@@ -656,7 +692,7 @@ if __name__ == '__main__':
     # %%
     # * loan amount sum
     var = 'LoanAmount_sum'
-    plot(ts_ob_bl_1, var, maturity, initial_stat = "loan amount total", empty_label = True,
+    plot(ts_ob_bl_1, var, maturity, initial_stat = "loan amount total (millions $)", empty_label = True,
         legend = True, filenameend=aucttype, legendlabel = 'OB')
     
     plot(ts, var, maturity, initial_stat = "loan amount total", empty_label = True,
@@ -669,27 +705,27 @@ if __name__ == '__main__':
     var = 'winner_bid_mean'    # df_tba df_bl_2020_ts ts_all_agg ts 
     # add bloomberg
     f, a = plot(ts_ob_bl_1, var, normalization_var= 'PX_Last', maturity = maturity,
-                initial_stat = "(mean)", legend=True, filenameend=aucttype + '_netbid')
+                initial_stat = "(mean) $ ", legend=True, filenameend=aucttype + '_netbid')
 
     # %%
     # ts_ob_bl_collapsed
     f, a = plot(ts_ob_bl_collapsed, var, normalization_var= 'PX_Last', maturity = maturity,
-                initial_stat = "(mean)", legend=True, filenameend= '_netbid')
+                initial_stat = "(mean) $ ", legend=True, filenameend= '_netbid')
 
     # %%
     f, a = plot(ts_ob_bl_1, var, maturity = maturity,
-            initial_stat = "(mean)", legend=True, filenameend=aucttype )
+            initial_stat = "(mean) $", legend=True, filenameend=aucttype )
 
     # %%
     # * median 
     var = 'winner_bid_median'
     f, a = plot(ts_ob_bl_1, var, normalization_var= 'PX_Last', maturity = maturity,
-                initial_stat = "(median)", legend=True, filenameend=aucttype + '_netbid')
+                initial_stat = "(median) $", legend=True, filenameend=aucttype + '_netbid')
     
     # %%
 
     f, a = plot(ts_ob_bl_collapsed, var, normalization_var= 'PX_Last', maturity = maturity,
-                initial_stat = "(median)", legend=True, filenameend='_netbid')
+                initial_stat = "(median) $", legend=True, filenameend='_netbid')
     
     # %%
     # * days to auction
@@ -756,7 +792,8 @@ if __name__ == '__main__':
     plot(df_ts_month, 'sold_GSE_mean', maturity, initial_stat = "fraction sold GSE", empty_label = True, 
                 color = 'tab:blue', save=True, varrate = '')
     
-    
+
+
     # %%
     # GSE prices
     # * mean (w if weighted)
@@ -784,11 +821,7 @@ if __name__ == '__main__':
 
     
 
-    # ******** Table Auctions ******** #
-    
-    # # %% 
-    plot(df_ts_month, 'sold_GSE_mean', maturity, initial_stat = "fraction sold GSE", empty_label = True, 
-                color = 'tab:blue', save=False, varrate = '')
+    # ****************************** Table Auctions  ********************************* #
 
     # * read bid level data
     # %%
@@ -819,7 +852,7 @@ if __name__ == '__main__':
     # %%
 
 
-    # * read auction level data
+    # *********************** read auction level data ******************************* #
     # %%
     
     # read 
@@ -846,7 +879,7 @@ if __name__ == '__main__':
                                 stats = ['count', 'mean', 'std', 'min', 'max'])
     table2
 
-
+    # %%
     # * Note Rate distribution
     # plot distribution of bids , var is Price, soft color, transparecy , no vertical line, bo bakground vertical lines
     df['NoteRate'].hist(bins=40, color = 'tab:blue', alpha = 0.5, edgecolor='black', linewidth=1.2, grid=False)

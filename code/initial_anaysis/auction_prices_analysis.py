@@ -227,7 +227,7 @@ def clean_data(df):
     df['FirstMonthYear'] = df['CommittedDate'].dt.to_period('M').dt.to_timestamp()
 
 
-    # convert loan ammount to thousands
+    # convert loan ammount to thousands -> hence if it shows 10^6 it is billion : 10^9
     df['LoanAmount'] = df['LoanAmount']/1000
 
     # create winner investor id per auction_id  #! Winner is highest bid not the investor got the loan
