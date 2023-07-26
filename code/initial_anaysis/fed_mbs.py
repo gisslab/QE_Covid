@@ -328,6 +328,9 @@ if __name__ == '__main__':
 
     df_merged = merge_bl_mbs(df_bl_clean, df_fed_monthly)
 
+    # save df merge 
+    df_merged.to_csv(f'{fed_data}/clean_data/fed_bl_forward_coupon_monthly.csv', sep='|', index=False)
+
     # %%
     df_merged.info()
 
@@ -466,7 +469,7 @@ if __name__ == '__main__':
 
     # ***** Begin area graph for trade amount by coupon ***** #
     # 
-    # Create nice figure were we plot the percent of trade amount in the month by coupon
+    # Create nice figure were we plot the percent of trade amount in the month by coupon, all forward months
     g = ['FirstMonthYear']
     df_coupons = df_merged.groupby(['Coupon', 'FirstMonthYear'])['fed_trade_amount'].sum().reset_index()
     df_coupons.columns = [ 'Coupon', 'FirstMonthYear', 'fed_trade_amount']

@@ -280,7 +280,11 @@ def plot(df, var,
 
     else: 
         df.sort_values(vartime, inplace=True)
-        ax.plot(df[vartime], df[var], color = color, label = legendlabel, alpha = 0.8, linewidth=2.0) # color = color,
+        df_ = df.copy()
+
+        if normalization_var != '':
+            df_[var] = df_[var] -  df_[normalization_var]
+        ax.plot(df_[vartime], df_[var], color = color, label = legendlabel, alpha = 0.8, linewidth=2.0) # color = color,
 
     # add horizontal lines
     for hl in horizontal_lines:
@@ -663,7 +667,11 @@ if __name__ == '__main__':
 
     ts_ob_bl = merge_bl_ob(df_bl_2020, ts_all)
 
-    ts_ob_bl_collapsed = merge_bl_ob(df_bl_2020, ts)
+    ts_ob_bl_collapsed = merge_bl_ob(df_bl_2020, ts) # not by auction type
+
+    # save 
+    ts_ob_bl.to_csv(f'{auction_data_folder}/ob_bl_merge_monthly_coupon_auctiontype.csv', index = False)
+    ts_ob_bl_collapsed.to_csv(f'{auction_data_folder}/ob_bl_merge_monthly_coupon.csv', index = False)
 
     # %%
     # only Coupon 3.0 
@@ -673,7 +681,7 @@ if __name__ == '__main__':
 
     # * filter by auction type
     aucttype = 'cash_window' #'cash_window' 
-    ts_ob_bl_1 = ts_ob_bl[ts_ob_bl['auction_type'] == aucttype]
+    ts_ob_bl_1 = ts_ob_bl[ts_ob_bl['auction_type'] == aucttype] 
 
     # %% 
     # ***************************** Plots ******************************************* #
