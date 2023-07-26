@@ -672,7 +672,7 @@ if __name__ == '__main__':
     # %%
 
     # * filter by auction type
-    aucttype = 'auction' #'cash_window' 
+    aucttype = 'cash_window' #'cash_window' 
     ts_ob_bl_1 = ts_ob_bl[ts_ob_bl['auction_type'] == aucttype]
 
     # %% 
@@ -714,7 +714,8 @@ if __name__ == '__main__':
 
     # %%
     f, a = plot(ts_ob_bl_1, var, maturity = maturity,
-            initial_stat = "(mean) $", legend=True, filenameend=aucttype )
+            initial_stat = "(mean) $", legend=True, filenameend=aucttype, 
+            horizontal_lines=[])
 
     # %%
     # * median 
@@ -731,7 +732,7 @@ if __name__ == '__main__':
     # * days to auction
     var = 'DaysToAuction_mean'
     f, a = plot(ts_ob_bl_1, var, maturity = maturity,
-                initial_stat = "Days to auction", legend=True, 
+                initial_stat = "Days to auction", legend=False, 
                 filenameend=aucttype,  empty_label = True)
 
     plot(df_ts_month, var, maturity, varrate = '', 
@@ -746,16 +747,19 @@ if __name__ == '__main__':
     # %%
     # * dummy sell winner
     var = 'dummy_sell_winner_mean'
-    plot(ts_ob_bl_1, var, maturity, initial_stat = "Rate sell to winner", empty_label = True, filenameend=aucttype, legend = True)
+    plot(ts_ob_bl_1, var, maturity, initial_stat = "Rate sell to winner", empty_label = True, 
+        horizontal_lines= [],
+        filenameend=aucttype, legend = True)
 
-    plot(df_ts_month, var, maturity, varrate = '', initial_stat = "Rate sell to winner", empty_label = True, legend = True)
+    plot(df_ts_month, var, maturity, varrate = '', initial_stat = "Rate sell to winner", empty_label = True, legend = False)
 
     # %%
     # * number of participants
     var = 'Number of Participants_mean'
-    plot(ts_ob_bl_1, var, maturity, initial_stat = "Number of participants", empty_label = True, legend = True)
+    plot(ts_ob_bl_1, var, maturity, initial_stat = "Number of participants", empty_label = True, legend = True, 
+         horizontal_lines= [], filenameend=aucttype)
 
-    plot(df_ts_month, var, maturity, varrate = '', initial_stat = "Number of participants", empty_label = True, legend = True)
+    plot(df_ts_month, var, maturity, varrate = '', initial_stat = "Number of participants", empty_label = True, legend = False)
 
     # %%
     
