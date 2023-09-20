@@ -35,6 +35,7 @@ auction_filename = 'combined_auctions_jan2018-jul2022_cleaned'
 
 ob_hmda_orig_folder = '/project/houde/mortgages/QE_Covid/data/data_auction/clean_data/hmda-ob-mbs_origination_data_apr2023.dta'
 """ Merged file with the ob, hmda, mbs data. """
+
 # * settings
 
 relevant_vars_ob_hmda_mbs = ['AuctionId', 
@@ -100,7 +101,7 @@ maturity = 30
 loantype = 1
 """ Type of the auctioned loans. 1 = Conforming"""
 
-dateinit = '2020-01-01'
+dateinit = '2019-07-01'
 """ Initial date of the auctioned loans."""
 
 dateend = '2021-12-31'
@@ -133,7 +134,7 @@ stats_auction = [
                 coeff_var,
                 p90_p10
                 ]
-""" Statistics to be calculated for the auction data."""
+""" Statistics to be calculated on the auction data."""
 
 def winsorize_series(s, lower, upper):
 #    clipped = s.clip(lower=s.quantile(lower), upper=s.quantile(upper), axis=1)
@@ -328,7 +329,7 @@ def create_measures_collapse(df):
     df = df.rename(columns={'Auction ID_': 'Auction ID'})
 
     # create auction classification
-    df.loc[(df_auc['sold_GSE'] == 0) & (df_auc['dummy_sell_any']==1), 'auction_type'] = 'auction'
+    df.loc[(df['sold_GSE'] == 0) & (df['dummy_sell_any']==1), 'auction_type'] = 'auction'
     df.loc[df['sold_GSE'] == 1.0, 'auction_type'] = 'cash_window'
 
     # print("Summary of the data: ", df.describe())
@@ -386,37 +387,45 @@ def to_time_series(df, bynote=False,
         df[f] = winsorize_series(df[f], 0.001, 0.999) 
     
 
-    df = df.groupby(group).agg({
-                                'Price_weighted': 'sum', # max,
-                                'Price': stats_max_price,
-                                'CommittedPrice': 'first',
-                                'CommittedPrice_weighted': 'sum', # accepted price
-                                'FirstMonthYear': 'first',
-                                'Auction ID': 'count',
-                                'BorrowerClosingDate': 'first',
-                                'DaysToAuction': 'mean',
-                                'Number of Enterprise Bidders': 'mean',
-                                'Number of Bulk Bidders': 'mean',
-                                'Number of Participants' : 'mean',
-                                'FannieBid': 'mean',
-                                'FreddieBid': 'mean',
-                                # 'GinnieBid': 'first',
-                                'i_FannieBid': 'mean',
-                                'i_FreddieBid': 'mean',
-                                # 'i_GinnieBid': 'first',
-                                'LoanAmount': ['mean', 'sum'],
-                                'ProductType': 'first',
-                                'dummy_sell_any': 'mean',
-                                'dummy_sell_winner': 'mean',
-                                'dummy_committedseller': 'mean',
-                                'dummy_committednan': 'mean',
-                                'sold_FannieBid': 'mean',
-                                'sold_FreddieBid': 'mean',
-                                'sold_GinnieBid': 'mean',
-                                'sold_GSE': 'mean',
-                                'bulk_bidders_fraction': 'mean',
-                                # 'loan_weight' : 'sum'
-                                }).reset_index()
+    # * collapse
+
+    dict_collapse = {
+                        'Price_weighted': 'sum', # max,
+                        'Price': stats_max_price,
+                        'CommittedPrice': 'first',
+                        'CommittedPrice_weighted': 'sum', # accepted price
+                        'FirstMonthYear': 'first',
+                        'Auction ID': 'count',
+                        'BorrowerClosingDate': 'first',
+                        'DaysToAuction': 'mean',
+                        'Number of Enterprise Bidders': 'mean',
+                        'Number of Bulk Bidders': 'mean',
+                        'Number of Participants' : 'mean',
+                        'FannieBid': 'mean',
+                        'FreddieBid': 'mean',
+                        # 'GinnieBid': 'first',
+                        'i_FannieBid': 'mean',
+                        'i_FreddieBid': 'mean',
+                        # 'i_GinnieBid': 'first',
+                        'LoanAmount': ['mean', 'sum'],
+                        'ProductType': 'first',
+                        'dummy_sell_any': 'mean',
+                        'dummy_sell_winner': 'mean',
+                        'dummy_committedseller': 'mean',
+                        'dummy_committednan': 'mean',
+                        'sold_FannieBid': 'mean',
+                        'sold_FreddieBid': 'mean',
+                        'sold_GinnieBid': 'mean',
+                        'sold_GSE': 'mean',
+                        'bulk_bidders_fraction': 'mean',
+                        # 'loan_weight' : 'sum'
+                    }
+    
+    if "s_coupon" in group:
+        # add to dictionary: min, mean, max, median of NoteRate
+        dict_collapse['NoteRate'] = ['min', 'mean', 'max', 'median']
+
+    df = df.groupby(group).agg(dict_collapse).reset_index()
     
     
 
@@ -469,12 +478,14 @@ def create_table_coupons(df_auc, table_folder):
 
 # %%
 
-# * main
+# * main (to run in jupyter notebook)
 
-if __name__ == '__main__':
-
+def main():
+    """
+    Main function to execute, it can be run in jupyter notebook interactive.
+    """
     # %%
-    # * saving coupon 
+    # * create, save coupon 
 
     # df_coupon = read_get_security_characteristics() 
 
@@ -492,7 +503,6 @@ if __name__ == '__main__':
     df_coupon = df_coupon.rename(columns={'AuctionId': 'Auction ID'})
 
     # %%
-    # %%
 
     # * Reading and processing OB data
     # %%
@@ -506,8 +516,6 @@ if __name__ == '__main__':
     df = df.merge(df_coupon, on='Auction ID', how='left')
 
     df.columns
-
-
     # %%
     # %%
     df1 = clean_data(df)
@@ -542,7 +550,6 @@ if __name__ == '__main__':
     df1[cols_describe].mean()
     # %%
     # ***************** data at auction level *****************
-
 
     df_auc = create_measures_collapse(df1)
 
@@ -579,6 +586,12 @@ if __name__ == '__main__':
         'Auction ID','CommittedInvestorKey', 'HedgeInvestorKey', 'HedgeClientKey', 
         'WinnerHedgeInvestorKey','Price','dummy_sell_winner']].head(35)
     
+    #%%
+    # * quantifying how many Nan bidders in df_auc 99999.0
+    nanbid = df_auc[df_auc['CommittedInvestorKey']==99999.0]
+    print("Number of nan bidders: ", nanbid.shape[0], "Number of auctions: ", df_auc['Auction ID'].nunique())
+    # eliminate nan bidders
+    df_auc = df_auc[df_auc['CommittedInvestorKey']!=99999.0]
 
     # %%
     # * how many missing s_coupon
@@ -673,6 +686,14 @@ if __name__ == '__main__':
     # %% 
 
     # * end of main
+
+
+
+if __name__ == '__main__':
+
+    main()
+
+    
 
 
 # %%
