@@ -386,6 +386,9 @@ def to_time_series(df, bynote=False,
         # print("Windsorized: " , f)
         df[f] = winsorize_series(df[f], 0.001, 0.999) 
     
+    # additional price variables - to the price is it was sold to Fannie, Freddie, Ginnie
+    df['price_fanny'] = np.where(df['sold_FannieBid'] == 1, df['Price'], np.nan)
+    df['price_freddie'] = np.where(df['sold_FreddieBid'] == 1, df['Price'], np.nan)
 
     # * collapse
 
@@ -418,6 +421,8 @@ def to_time_series(df, bynote=False,
                         'sold_GinnieBid': 'mean',
                         'sold_GSE': 'mean',
                         'bulk_bidders_fraction': 'mean',
+                        'price_fanny': 'mean',
+                        'price_freddie': 'mean',
                         # 'loan_weight' : 'sum'
                     }
     
@@ -425,9 +430,10 @@ def to_time_series(df, bynote=False,
         # add to dictionary: min, mean, max, median of NoteRate
         dict_collapse['NoteRate'] = ['min', 'mean', 'max', 'median']
 
+    # * collapsing
+    print("Collapsing data by: ", group)
     df = df.groupby(group).agg(dict_collapse).reset_index()
-    
-    
+
 
     # rename to eliminate multiindex and other small details
     df.columns = ['_'.join(col).strip() for col in df.columns.values]
@@ -551,7 +557,7 @@ def main():
     # %%
     # ***************** data at auction level *****************
 
-    df_auc = create_measures_collapse(df1)
+    # df_auc = create_measures_collapse(df1)
 
     # %%
     # # ***************** read data at auction level clean *****************

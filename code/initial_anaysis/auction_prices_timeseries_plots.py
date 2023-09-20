@@ -120,7 +120,7 @@ def tide_auction_data(df,
 
 def tide_collapse_bloomberg_data(df_, 
                                 interval = (1,7), # coupon range
-                                min_date = '2020-01-01', max_date = '2021-12-31', #'2020-05-01'
+                                min_date = '2019-07-01', max_date = '2021-12-31', #'2020-05-01'
                                 tickers = ['FNCL', 'FGLMC'],
                                 service_fee = 0.75,
                                 group_by = ['FirstMonthYear', 'Coupon'], #Trading_Date
@@ -320,7 +320,9 @@ def plot(df, var,
             intervals = f'{interval[0]}_{interval[1]}_'
         else: intervals = ''
 
-        fig.savefig(f'{auction_save_folder}/{var}_mat{maturity}_loan{loantype}_timeseries_{agglevel}_{intervals}{filenameend}.pdf')
+        filepath = f'{auction_save_folder}/{var}_mat{maturity}_loan{loantype}_timeseries_{agglevel}_{intervals}{filenameend}.pdf'
+        print('Saving plot to: ', filepath)
+        fig.savefig(filepath)
 
     return fig, ax
 
@@ -352,7 +354,9 @@ def create_table_stats(df,
     df_table = df_table[stats]
 
     # to tex
-    df_table.to_latex(f'{table_folder}/auctions_level_mat{mat}_loan{loantype}_{additional_name}.tex')
+    filepath = f'{table_folder}/auctions_level_mat{mat}_loan{loantype}_{additional_name}.tex'
+    print('Saving table to: ', filepath)
+    df_table.to_latex(filepath)
 
     return df_table
 
@@ -574,7 +578,7 @@ def main():
 
     # choosing note rate range
     interval = (2.5,4) #ap.couponrange_list[2]
-    set_coupons = [2.5, 3.0, 4.0]
+    set_coupons = [ 2.5, 3.0, 3.5, 4.0] #1.5, 2.0,
 
     # * dataframe 1: by auction type 
     # building path 
@@ -667,6 +671,7 @@ def main():
     # %%
     # *********************** merge OB and BL data ********************************** #
 
+    # * auction type, year, month coupon level 
     ts_ob_bl = merge_bl_ob(df_bl_2020, ts_all)
 
     ts_ob_bl_collapsed = merge_bl_ob(df_bl_2020, ts) # not by auction type
@@ -684,6 +689,7 @@ def main():
     # * filter by auction type
     aucttype = 'cash_window' #'cash_window' 
     ts_ob_bl_1 = ts_ob_bl[ts_ob_bl['auction_type'] == aucttype] 
+    # acreate new auction type variable that distinguishes SWAPS: if sold_any
 
     # %% 
     # ***************************** Plots ******************************************* #
@@ -705,7 +711,7 @@ def main():
     plot(ts_ob_bl_1, var, maturity, initial_stat = "loan amount total (millions $)", empty_label = True,
         legend = True, filenameend=aucttype, legendlabel = 'OB')
     
-    plot(ts, var, maturity, initial_stat = "loan amount total", empty_label = True,
+    plot(ts, var, maturity, initial_stat = "loan amount total (millions $)", empty_label = True,
         legend = True, legendlabel = 'OB')
     
 
@@ -742,7 +748,7 @@ def main():
     # * days to auction
     var = 'DaysToAuction_mean'
     f, a = plot(ts_ob_bl_1, var, maturity = maturity,
-                initial_stat = "Days to auction", legend=False, 
+                initial_stat = "Days to auction", legend=True, 
                 filenameend=aucttype,  empty_label = True)
 
     plot(df_ts_month, var, maturity, varrate = '', 
@@ -784,20 +790,24 @@ def main():
     var = 'Number of Bulk Bidders_mean'
     plot(df_ts_month, var, maturity, varrate = '', initial_stat = "Number of bulk bidders", empty_label = True, save = True)
 
+    # by coupon
+    plot(ts, var, maturity, initial_stat = "Number of bulk bidders", empty_label = True, save = True, legend="True")
+
     # %%
     # * bulk bidders fraction
 
     var = 'bulk_bidders_fraction_mean'
     plot(df_ts_month, var, maturity,  varrate = '', initial_stat = "Bulk bidders fraction", empty_label = True, save = True)
 
-    
+    # by coupon
+    plot(ts, var, maturity, initial_stat = "Bulk bidders fraction", empty_label = True, save = True, legend="True")
 
     # %%
     # * Enterprise sold
     #! maybe this makes more sense for all bids not only auction type, not separate coupons
     f,a = plot(df_ts_month, 'sold_FannieBid_mean', maturity, initial_stat = "fraction sold", empty_label = True, 
                 color = 'tab:blue', legend=True, legendlabel = 'Fannie Mae', save=False, varrate = '',)
-    f,a = plot(df_ts_month, 'sold_FreddieBid_mean', maturity, initial_stat = "fraction sold", 
+    f,a = plot(df_ts_month, 'sold_FreddieBid_mean', maturity, initial_stat = "fraction sold", empty_label = True,
                 varrate = '', fig = f, ax = a, color = 'tab:orange', legend=True, legendlabel = 'Freddie Mac', save=True)
     # f,a = plot(ts, 'sold_GinnieBid_mean', maturity, initial_stat = "fraction sold", fig = f, ax = a, color = 'tab:green', legend=True, legendlabel = 'Ginnie Mae', save=True)
 
