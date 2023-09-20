@@ -79,7 +79,7 @@ def read_data(file, path, datetime_vars = ['CommittedDate', 'BorrowerClosingDate
         return None
     
 def tide_auction_data(df, 
-                      min_date = '2020-01-01', max_date = '2021-12-31', 
+                      min_date = '2019-07-01', max_date = '2021-12-31', 
                       min_daily_count = 10,
                       vartime = 'FirstMonthYear', #'CommittedDate', # ,
                       interval = (1,7), 
@@ -440,7 +440,7 @@ def compute_note_rate_value(row, df_tba, service_fee = 0.75):
 
 def plot_separated_ob_bl(ts, df_bl_2020_ts):
     """
-    Old plot function to plot OB and BL separately intead of net bid. 
+    Old plot function to plot OB and BL separately intead of net bid. Deprecated.
     """
     # %%
     # ******** Plots ******** #
@@ -548,8 +548,9 @@ def plot_separated_ob_bl(ts, df_bl_2020_ts):
 #%%
 # * main function
 
-if __name__ == '__main__':
 
+
+def main():
     
     # %%
     # *********************************** Data ********************************* #
@@ -615,6 +616,7 @@ if __name__ == '__main__':
     # %%
     df_ts_all.columns
     # %%
+    # * cleaning time series data
     # ts = filter_bins_rates(df_ts, min_rate = 3, max_rate = 3.75)
     # ts = tide_auction_data(df_ts)
     ts_all = tide_auction_data(df_ts_all, 
@@ -905,3 +907,9 @@ if __name__ == '__main__':
 
 
 # %%
+
+
+
+if __name__ == '__main__':
+
+    main()

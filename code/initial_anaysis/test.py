@@ -1,3 +1,10 @@
+"""
+Created on Thu June 1, 2023
+@author: Giselle Labrador Badia (@gisslab)
+
+This  scrip is for testing purposes only.
+
+"""
 
 #%%
 import os
@@ -111,7 +118,6 @@ for col in df_auc.columns[41:62]:
 
 
 # *********************************************************************************************
-
 ### * blomberg data testing * ###
 
 bl_data_folder = '/project/houde/mortgages/QE_Covid/data/data_TBA/bloomberg/'
@@ -155,7 +161,7 @@ ob_hmda_orig_folder = '/project/houde/mortgages/QE_Covid/data/data_auction/clean
 
 # large file, read only 100000 rows
 
-df_ob_hmda_orig = pd.read_stata(ob_hmda_orig_folder, chunksize=100000, iterator=True) #, chunksize=100000
+df_ob_hmda_orig = pd.read_stata(ob_hmda_orig_folder, chunksize=100000, iterator=True,  convert_categoricals = False) #, chunksize=100000
 
 
 # %%
@@ -180,3 +186,30 @@ for col in df.columns[61:90]:
 # %%
 for col in df.columns[91:120]:
     print(col, " - ", df.loc[0,col])        
+
+# %%
+for col in df.columns[121:150]:
+    print(col, " - ", df.loc[0,col])
+
+# %%
+for col in df.columns[151:180]:
+    print(col, " - ", df.loc[0,col])
+
+# %%
+for col in df.columns[181:210]:
+    print(col, " - ", df.loc[0,col])
+
+# %%
+for col in df.columns[211:240]:
+    print(col, " - ", df.loc[0,col])
+
+# %%
+for col in df.columns[241:274]:
+    print(col, " - ", df.loc[0,col])
+
+
+
+
+
+# *********************************************************************************************
+# %%
