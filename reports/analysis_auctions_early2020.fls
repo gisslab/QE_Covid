@@ -664,10 +664,11 @@ INPUT ../results/figures/fed_price_mean_mat30_loan1_timeseries_cpmonthly_normali
 INPUT ../results/figures/fed_price_mean_mat30_loan1_timeseries_cpmonthly_normalized_coup2.5.pdf
 INPUT ../results/figures/fed_price_mean_mat30_loan1_timeseries_cpmonthly_normalized_coup2.5.pdf
 INPUT ../results/figures/fed_price_mean_mat30_loan1_timeseries_cpmonthly_normalized_coup2.5.pdf
-INPUT ../results/figures/fed_price_mean_mat30_loan1_timeseries_cpmonthly_normalized.pdf
-INPUT ../results/figures/fed_price_mean_mat30_loan1_timeseries_cpmonthly_normalized.pdf
-INPUT ../results/figures/fed_price_mean_mat30_loan1_timeseries_cpmonthly_normalized.pdf
-INPUT ../results/figures/fed_price_mean_mat30_loan1_timeseries_cpmonthly_normalized.pdf
+INPUT ../results/figures/fed_price_mean_mat30_loan1_timeseries_cpmonthly_.pdf
+INPUT ../results/figures/fed_price_mean_mat30_loan1_timeseries_cpmonthly_.pdf
+INPUT ../results/figures/fed_price_mean_mat30_loan1_timeseries_cpmonthly_.pdf
+INPUT ../results/figures/fed_price_mean_mat30_loan1_timeseries_cpmonthly_.pdf
+INPUT ../results/figures/fed_price_mean_mat30_loan1_timeseries_cpmonthly_.pdf
 INPUT ../results/figures/distribution_of_bids.png
 INPUT ../results/figures/distribution_of_bids.png
 INPUT ../results/figures/distribution_of_bids.png
