@@ -146,7 +146,10 @@ no_banks = [
             'GUILE MORTGAGE COMPANY LLC',
             'ON Q FINANCIAL, INC.',
             'AMERICAN FINANCIAL RESOURCES, INC.',
-            'UNITED SECURITY FINANCIAL CORP'
+            'UNITED SECURITY FINANCIAL CORP',
+            'SUN WEST MORTGAGE CO., INC.',
+            'VILLAGE CAPITAL & INVESTMENT, LLC',
+            'IMPAC MORTGAGE',
             ]
 """ List of mortagaes servicers that are not banks. """
 
@@ -213,17 +216,17 @@ def adding_investors_information(df):
 
     # read crosswalks file
     df_crosswalk = pd.read_stata(f'{crosswalk_folder}/{crosswalk_investors_filename}')
-    df_crosswalk.rename(columns={'o_CommittedInvestorKey': 'CommittedInvestorKey'}, inplace=True)
 
     # merge to int
-    df_crosswalk['CommittedInvestorKey'] = df_crosswalk['CommittedInvestorKey'].astype(int)
-    df['CommittedInvestorKey'] = df['CommittedInvestorKey'].astype(int)
-    # merge with df on CommittedInvestorKey
-    df = df.merge(df_crosswalk, on='CommittedInvestorKey',  how='left')
+    df_crosswalk['o_CommittedInvestorKey'] = df_crosswalk['o_CommittedInvestorKey'].astype(int)
+    df['HedgeInvestorKey'] = df['HedgeInvestorKey'].astype(int)
 
-    print("Number of investors keys in Ob", df["CommittedInvestorKey"].nunique())
-    print("Number of investors keys in crosswalk", df_crosswalk["CommittedInvestorKey"].nunique())
-    df_not_in_crosswalk = df[~df['CommittedInvestorKey'].isin(df_crosswalk['CommittedInvestorKey'])]
+
+    df = df.merge(df_crosswalk, left_on = 'HedgeInvestorKey', right_on='o_CommittedInvestorKey',  how='left')
+
+    print("Number of investors keys in Ob", df["HedgeInvestorKey"].nunique())
+    print("Number of investors keys in crosswalk", df_crosswalk["o_CommittedInvestorKey"].nunique())
+    df_not_in_crosswalk = df[~df['HedgeInvestorKey'].isin(df_crosswalk['o_CommittedInvestorKey'])]
     # print("Unmatched investor keys", df_not_in_crosswalk["CommittedInvestorKey"].unique())
 
     # * classify investors by investor's name (InvestorName) no banks list
@@ -235,7 +238,9 @@ def adding_investors_information(df):
     print("Number of non-banks: ", df[df['bank'] == 0]['issuername'].nunique())
 
     # create number of banks by loan
-    df['number_banks'] = df.groupby(['Auction ID'])['bank'].transform('sum')
+    df["name_if_bank"] = np.where(df['bank'] == 1, df['issuername'], np.nan)
+    df['number_banks'] = df.groupby(['Auction ID']).transform('nunique')['name_if_bank']
+
     df['fraction_banks'] = df['number_banks']/df['Number of Participants']
 
     # ? Note: If 99999 is -1, 99999 is nan, 17, 22, 23, 51 are GSEs. Then there are missing investors: 58 - 43 - 6 = 9
@@ -637,15 +642,19 @@ def main():
     # %%
 
     # * adding investors information
-    df1 = adding_investors_information(df1)
+    df2 = adding_investors_information(df1)
 
 
     # %%
+    df2[['bank', 'number_banks', 'name_if_bank', "Number of Participants"]].head(20)
+    
+    #%%
+    df2[['bank', 'number_banks', 'name_if_bank', "Number of Participants"]].describe()
 
 
     # ***************** data at auction level *****************
 
-    df_auc = create_measures_collapse(df1)
+    df_auc = create_measures_collapse(df2)
 
     # %%
     # # ***************** read data at auction level clean *****************

@@ -251,13 +251,31 @@ def plot(df, var,
           filenameend = '',
           normalization_var = '', #'PX_Last',
           interval = interval,
+          linestyle='-'
           ):
     """
-    Plots the time series of the variable var (y axis) by varrate where vartime is the x axis and varrate is the color.
+    Plots the time series of the variable <var> (y axis) by <varrate> where <vartime> is the x axis . <varrate> variable defines the color.
 
     df : dataframe with the data to plot.
     var : variable to plot.
     initial_stat : Label that goes in title and ylabel.
+    vertical_lines : list of dates to plot vertical lines.
+    horizontal_lines : list of values to plot horizontal lines.
+    fig : figure to plot on.
+    ax : axis to plot on.
+    color : color of the line.
+    save : boolean, if True saves the figure.
+    empty_label : boolean, if True does not add additional text to the y axis label.
+    legend : boolean, if True adds legend.
+    legendlabel : label of the legend variable.
+    title : boolean, if True adds title.
+    vartime : variable to plot in the x axis.
+    varrate : variable to plot in the color.
+    filenameend : string to add to the filename when saving.
+    normalization_var : variable to normalize the variable to plot.
+    interval : tuple with the interval of the variable to plot.
+    linestyle : linestyle of the plot.
+
     """
     agglevel = 'daily' if vartime == 'Trading_Date' else 'monthly'
     agglevel = 'cp' + agglevel if varrate == 'Coupon' else 'nr' + agglevel
@@ -275,7 +293,7 @@ def plot(df, var,
             df_.sort_values(vartime, inplace=True)
             if normalization_var != '':
                 df_[var] = df_[var] -  df_[normalization_var]
-            ax.plot(df_[vartime], df_[var], label = f'{coupon}', alpha = 0.8, linewidth=2.0) # color = color, 
+            ax.plot(df_[vartime], df_[var], label = f'{coupon}', alpha = 0.8, linewidth=2.0, linestyle = linestyle) # color = color, 
 
 
     else: 
@@ -284,7 +302,7 @@ def plot(df, var,
 
         if normalization_var != '':
             df_[var] = df_[var] -  df_[normalization_var]
-        ax.plot(df_[vartime], df_[var], color = color, label = legendlabel, alpha = 0.8, linewidth=2.0) # color = color,
+        ax.plot(df_[vartime], df_[var], color = color, label = legendlabel, alpha = 0.8, linewidth=2.0, linestyle = linestyle) # color = color,
 
     # add horizontal lines
     for hl in horizontal_lines:
@@ -442,111 +460,6 @@ def compute_note_rate_value(row, df_tba, service_fee = 0.75):
     return value_note_rate
 
 
-def plot_separated_ob_bl(ts, df_bl_2020_ts):
-    """
-    Old plot function to plot OB and BL separately intead of net bid. Deprecated.
-    """
-    # %%
-    # ******** Plots ******** #
-    # %%
-    #* count
-
-    var = 'winner_bid_count'
-    plot(ts, var, maturity,  initial_stat = "Count", legendlabel="OB")
-
-    # %%
-    # * loan amount sum
-    var = 'LoanAmount_sum'
-    plot(ts, var, maturity, initial_stat = "Loan amount sum", empty_label = True)
-    # # %%
-    # # * min 
-
-    # var = 'winner_bid_min'
-    # plot(ts, var, maturity, initial_stat = "Min")
-
-    # # %%
-    # # * max 
-
-    # var = 'winner_bid_max'
-    # plot(ts, var, maturity, initial_stat = "Max")
-
-    # %%
-
-
-    # %%
-    # ? Note : Use  ts, and df_tba when larger aggregation is needed
-    # * mean (w if weighted)
-    var = 'w_winner_bid_mean'    # df_tba df_bl_2020_ts ts_all_agg ts 
-    # add bloomberg
-    f, a = plot(df_bl_2020_ts, var = 'PX_Last', maturity = maturity, initial_stat = "",  color = 'tab:orange', legend=True, legendlabel = 'Bloomberg', save=False)
-    f, a = plot(ts, var, maturity, initial_stat = "Mean", fig = f, ax = a, color = 'tab:blue', legend=True, legendlabel = 'OB', save=True)
-
-    # %%
-    # * median 
-    var = 'winner_bid_median'
-    f, a = plot(df_bl_2020_ts, var = 'PX_Last', maturity = maturity, initial_stat = "",  color = 'tab:orange', legend=True, legendlabel = 'Bloomberg', save=False)
-    plot(ts, var, maturity, initial_stat = "Median", fig = f, ax = a, color = 'tab:blue', legend=True, legendlabel = 'OB', save=True)
-    
-    # %%
-    # * days to auction
-    var = 'DaysToAuction_mean'
-    plot(ts, var, maturity, initial_stat = "Days to auction", empty_label = True)
-
-    # %%
-    # * dummy sell any
-    var = 'dummy_sell_any_mean'
-    plot(ts, var, maturity, initial_stat = "Rate sell", empty_label = True)
-
-    # %%
-    # * dummy sell winner
-    var = 'dummy_sell_winner_mean'
-    plot(ts, var, maturity, initial_stat = "Rate sell to winner", empty_label = True)
-
-    # %%
-    # * number of participants
-    var = 'Number of Participants_mean'
-    plot(ts, var, maturity, initial_stat = "Number of participants", empty_label = True)
-
-    # %%
-    
-    # * number of enterprise bidders
-    var = 'Number of Enterprise Bidders_mean'
-    plot(ts, var, maturity, initial_stat = "Number of enterprise bidders", empty_label = True)
-
-    # %%
-    # * number of bulk bidders
-    var = 'Number of Bulk Bidders_mean'
-    plot(ts, var, maturity, initial_stat = "Number of bulk bidders", empty_label = True)
-
-    # %%
-    # * bulk bidders fraction
-    var = 'bulk_bidders_fraction_mean'
-    plot(ts, var, maturity, initial_stat = "Bulk bidders fraction", empty_label = True)
-
-    # %%
-    # * Enterprise sold
-    
-    f,a = plot(ts, 'sold_FannieBid_mean', maturity, initial_stat = "fraction sold", empty_label = True, color = 'tab:blue', legend=True, legendlabel = 'Fannie Mae', save=False)
-    f,a = plot(ts, 'sold_FreddieBid_mean', maturity, initial_stat = "fraction sold", fig = f, ax = a, color = 'tab:orange', legend=True, legendlabel = 'Freddie Mac', save=True)
-    # f,a = plot(ts, 'sold_GinnieBid_mean', maturity, initial_stat = "fraction sold", fig = f, ax = a, color = 'tab:green', legend=True, legendlabel = 'Ginnie Mae', save=True)
-
-    # # %% 
-    # # * std
-
-    # var = 'winner_bid_std'
-    # plot(ts, var, maturity, initial_stat = "Std")
-
-    # # %%
-    # # * coeff var
-    # # 
-    # var = 'winner_bid_coeff_var' 
-    # plot(ts, var, maturity, initial_stat = "CV")
-
-    # # %%
-    # # * p90-p10
-
-    # var = 'winner_bid_p90_p10'
-    # plot(ts, var, maturity, initial_stat = "P90-P10")
 
 
 #%%
@@ -580,15 +493,10 @@ def main():
     interval = (2.5,4) #ap.couponrange_list[2]
     set_coupons = [ 2.5, 3.0, 3.5, 4.0] #1.5, 2.0,
 
-    # * dataframe 1: by auction type 
+    # * dataframe 1: by auction type, coupon
     # building path 
     filename_timeseries_all = f'{auction_filename}_mat{maturity}_loan{loantype}_timeseries_{var_rate}_{var_time}_auctype'
     # filename_timeseries = f'{auction_filename}_mat{maturity}_loan{loantype}_timeseries_{var_rate}_{interval[0]}_{interval[1]}_{var_time}_auctype'
-
-
-    # df_ts = read_data(file = f'timeseries/{filename_timeseries}', 
-    #                   path = auction_data_folder,
-    #                   datetime_vars= [])
 
 
     print('Note rate range: ', interval)
@@ -597,7 +505,7 @@ def main():
                         path = auction_data_folder,
                         datetime_vars=['FirstMonthYear'])
     
-    # * dataframe 2: coupon 
+    # * dataframe 2: by coupon 
     
     filename_timeseries_coup = f'{auction_filename}_mat{maturity}_loan{loantype}_timeseries_{var_rate}_{var_time}'
 
@@ -674,6 +582,7 @@ def main():
     # * auction type, year, month coupon level 
     ts_ob_bl = merge_bl_ob(df_bl_2020, ts_all)
 
+    # * by coupon, year, month
     ts_ob_bl_collapsed = merge_bl_ob(df_bl_2020, ts) # not by auction type
 
     # save 
@@ -687,11 +596,20 @@ def main():
     # %%
 
     # * filter by auction type
-    aucttype = 'cash_window' #'cash_window' 
-    ts_ob_bl_1 = ts_ob_bl[ts_ob_bl['auction_type'] == aucttype] 
-    # acreate new auction type variable that distinguishes SWAPS: if sold_any
+    aucttype = 'auction' #'cash_window'  'auction'
+    ts_ob_bl_1 = ts_ob_bl[ts_ob_bl['auction_type'] == aucttype].copy()
+    
 
     # %% 
+
+    # collapse coupons by averaging the prices by day, auction type
+    # create normalize price winner_bid_mean - PX_Last
+    ts_ob_bl_1['winner_bid_mean_n'] = ts_ob_bl_1['winner_bid_mean'] - ts_ob_bl_1['PX_Last']
+    # now collapse by day weighting by LoanAmount_sum
+    ts_ob_bl_1['total_loan_amount_day'] = ts_ob_bl_1.groupby(['FirstMonthYear'])['LoanAmount_sum'].transform('sum')
+    ts_ob_bl_1['w_winner_bid_mean_n'] = ts_ob_bl_1['winner_bid_mean_n'] * ts_ob_bl_1['LoanAmount_sum']/ ts_ob_bl_1['total_loan_amount_day']
+    ts_ob_bl_1_collapse = ts_ob_bl_1.groupby(['FirstMonthYear']).agg({'w_winner_bid_mean_n': 'sum'}).reset_index()
+
     # ***************************** Plots ******************************************* #
 
 
@@ -708,7 +626,7 @@ def main():
     # %%
     # * loan amount sum
     var = 'LoanAmount_sum'
-    plot(ts_ob_bl_1, var, maturity, initial_stat = "loan amount total (millions $)", empty_label = True,
+    plot(ts_ob_bl_1, var, maturity, initial_stat = "Loan amount total (millions $)", empty_label = True,
         legend = True, filenameend=aucttype, legendlabel = 'OB')
     
     plot(ts, var, maturity, initial_stat = "loan amount total (millions $)", empty_label = True,
@@ -744,6 +662,16 @@ def main():
     f, a = plot(ts_ob_bl_collapsed, var, normalization_var= 'PX_Last', maturity = maturity,
                 initial_stat = "(median) $", legend=True, filenameend='_netbid')
     
+    # ******************* aggregated prices by day ********************************** #
+    # %%
+    # ts_ob_bl_1_collapse
+    # * mean (w if weighted)
+    var = 'w_winner_bid_mean_n'    # df_tba df_bl_2020_ts ts_all_agg ts
+    f, a = plot(ts_ob_bl_1_collapse, var, maturity = maturity, varrate='',
+                initial_stat = "(mean) $ ", legend=True, filenameend=aucttype + '_netbid')
+
+    
+    # ************************ Distress signs in the OB auctions    ********************************** #
     # %%
     # * days to auction
     var = 'DaysToAuction_mean'
@@ -813,33 +741,71 @@ def main():
 
     # %% 
     # * sold GSE
-    plot(df_ts_month, 'sold_GSE_mean', maturity, initial_stat = "fraction sold GSE", empty_label = True, 
+    plot(df_ts_month, 'sold_GSE_mean', maturity, initial_stat = "Fraction sold to GSE", empty_label = True, 
                 color = 'tab:blue', save=True, varrate = '')
+    # %%
+     # * sold GSE by coupon
+    plot(ts, 'sold_GSE_mean', maturity, initial_stat = "Fraction sold to GSE", empty_label = True, legend = True,
+                color = 'tab:blue', save=True)
+    
+    # %%
+    # 
+    # * GSE prices mean (w if weighted)
+    
+    ts_ob_bl_collapsed['price_diff'] = ts_ob_bl_collapsed['price_fanny_mean'] - ts_ob_bl_collapsed['price_freddie_mean']
+    ts_ob_bl_collapsed_c25 = ts_ob_bl_collapsed[ts_ob_bl_collapsed['Coupon'] == 2.5].copy()
     
 
-
+    f,a = plot(ts_ob_bl_collapsed_c25, 'price_fanny_mean', maturity, initial_stat =  "Highest bid (mean) difference", empty_label = True, normalization_var= 'PX_Last' ,
+                color = 'tab:blue', legend=True, legendlabel = 'Fannie Mae', save=False, varrate = '',)
+    f,a = plot(ts_ob_bl_collapsed_c25, 'price_freddie_mean', maturity, initial_stat =   "Highest bid (mean) difference", empty_label = True, normalization_var= 'PX_Last' ,
+                varrate = '', fig = f, ax = a, color = 'tab:orange', legend=True, legendlabel = 'Freddie Mac', save=True,
+                filenameend='byGSE_c25')
     # %%
-    # GSE prices
-    # * mean (w if weighted)
+    # * difference F F prices
 
+    plot(ts_ob_bl_collapsed, 'price_diff', maturity, initial_stat =  "Highest bid (mean) difference", empty_label = True, 
+                color = 'tab:blue', save=True, varrate = "Coupon", filenameend='diffFF')
+    
+    plot(ts_ob_bl_collapsed_c25, 'price_diff', maturity, initial_stat =  "Highest bid (mean) difference", empty_label = True, 
+                color = 'tab:blue', save=True, varrate = "Coupon", filenameend='diffFF_c25')
+    # moving average
+    # %%
+    # * moving average
+    nma = 5
+    ts_ob_bl_collapsed_c25['price_diff_ma'] = ts_ob_bl_collapsed_c25['price_diff'].rolling(window=nma).mean()
+    plot(ts_ob_bl_collapsed_c25, 'price_diff_ma', maturity, initial_stat = "highest bid (mean) difference", empty_label = True, 
+                color = 'tab:blue', save=True, varrate = '', filenameend=f'diffFF_ma{nma}_c25')
+    # %%
+    # * Number of banks in the auction
+    var = 'number_banks_mean'
+    plot(df_ts_month, var, maturity, varrate = '', initial_stat = "Number of banks in auction",
+            empty_label = True,        
+            save = False)
+    # %%
+    # * fraction of banks in the auction
+    var = 'fraction_banks_mean'
+    plot(df_ts_month, var, maturity, varrate = '', initial_stat = "Fraction bank bidders", empty_label = True, save = True)
 
+    # by coupon
+    plot(ts, var, maturity, initial_stat = "fraction bank bidders", empty_label = True, save = True, legend="True")
 
-    # # * std
+    
+    # %%
+    # ***************************** Coupons note rates over time ******************************************* #
+    
+    coupon = 2.5
+    ts_coupon = ts_ob_bl_collapsed[ts_ob_bl_collapsed['Coupon'] == coupon].copy()
 
-    # var = 'winner_bid_std'
-    # plot(ts, var, maturity, initial_stat = "Std")add 
-
-    # # %%
-    # # * coeff var
-    # # 
-    # var = 'winner_bid_coeff_var' 
-    # plot(ts, var, maturity, initial_stat = "CV")
-
-    # # %%
-    # # * p90-p10
-
-    # var = 'winner_bid_p90_p10'
-    # plot(ts, var, maturity, initial_stat = "P90-P10")
+    # * by coupon: 2.5, 3.0, 3.5, 4.0
+    f,a = plot(ts_coupon, 'NoteRate_min', maturity, initial_stat =  "Note rate", empty_label = True,
+                color = 'tab:blue', save=True, varrate = "", filenameend=f'c{coupon*10}', linestyle='--', horizontal_lines = [])
+    
+    f,a = plot(ts_coupon, 'NoteRate_max', maturity, initial_stat =  "Note rate", empty_label = True, 
+                color = 'tab:blue', fig = f, ax = a, save=True, varrate = "", filenameend=f'c{coupon*10}', linestyle='--', horizontal_lines = [])
+    
+    f,a = plot(ts_coupon, 'NoteRate_mean', maturity, initial_stat =  "Note rate", empty_label = True, 
+                color = 'tab:blue', fig = f, ax = a, save=True, varrate = "", filenameend=f'c{coupon*10}',  horizontal_lines = [])
 
 
 
@@ -912,7 +878,8 @@ def main():
     plt.title('Distribution of note rates')
     plt.savefig(f'{auction_save_folder}/distribution_of_noterates.png', dpi=300)
 
-    # * end of main
+    
+    # *********************** end of main ******************************* #
 
 
 

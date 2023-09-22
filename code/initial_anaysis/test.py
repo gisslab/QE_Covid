@@ -207,6 +207,18 @@ for col in df.columns[211:240]:
 for col in df.columns[241:274]:
     print(col, " - ", df.loc[0,col])
 
+# %%
+# e_PoolPrefix  -  CL
+# e_SecurityMnemonic  -  FNMCB3671
+# e_Seller
+print("Unique values for e_Seller", df.e_Seller.nunique())
+df.e_Seller.value_counts().head(20)
+
+# %%
+df.e_PoolPrefix.value_counts()
+
+# %%
+
 
 
 

@@ -230,7 +230,7 @@ def plot_simple_coupon(df, agencies = agencies, on = ['tradedate', 'Coupon'], ad
     # g.figure.savefig(f'{auction_save_folder}/figures/{agency}_purchases_contractualsettlementdate_price.png_{addname}')
 
 
-
+#%%
 
 # * main
 
@@ -425,6 +425,21 @@ if __name__ == '__main__':
                 legend = True,
                 interval= None, 
                 filenameend="coup2.5"
+    )   
+
+    # %%
+    # by coupon 
+    apts.plot(df_merged_1m,
+            maturity = maturity,
+            vertical_lines=[],
+            horizontal_lines=[0],
+            var = 'fed_price_mean',
+            initial_stat = "Mean price ($)",
+            empty_label = True,
+            legend = True,
+            interval= None, 
+            normalization_var= 'PX_Last',
+            filenameend="coup2.5"
     )   
 
     # %%
