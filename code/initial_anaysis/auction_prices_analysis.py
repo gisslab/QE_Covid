@@ -29,6 +29,9 @@ auction_data_folder = '/project/houde/mortgages/QE_Covid/data/data_auction/clean
 # auction_save_folder = '/project/houde/mortgages/data/intermediate/ob_auctions'
 auction_save_folder = '/project/houde/mortgages/QE_Covid/data/data_auction/clean_data'
 
+crosswalk_folder = '/project/houde/mortgages/QE_Covid/data/crosswalks'
+crosswalk_investors_filename = 'gnma_issuer_investor_crosswalk_full.dta'
+
 table_folder = '/project/houde/mortgages/QE_Covid/results/tables'
 
 auction_filename = 'combined_auctions_jan2018-jul2022_cleaned'
@@ -115,6 +118,38 @@ couponrange_list = [(1,5), (1,1.5), (2, 2.5), (2.5, 3), (3, 3.5), (3.5, 4), (4, 
 """ List of tuples with the ranges of the coupon to be used in the analysis. The elements are:
 [(1,5),(1,1.5), (2, 2.5), (2.5, 3), (3, 3.5), (3.5, 4), (4, 4.5)] """
 
+no_banks = [
+            'PENNYMAC LOAN SERVICES, LLC',
+            'CALIBER HOME LOANS, INC.',
+            'HOME POINT FINANCIAL CORPORATI ON',
+            'NATIONSTAR MORTGAGE, LLC',
+            'LAKEVIEW LOAN SERVICING, LLC',
+            'DITECH FINANCIAL LLC',
+            'NEWREZ LLC',
+            'PLANET HOME LENDING, LLC',
+            'TOWNE MORTGAGE COMPANY',
+            'THE MONEY SOURCE INC.',
+            'AMERIHOME MORTGAGE COMPANY,LLC',
+            'RUSHMORE LOAN MANAGEMENT SERVI CES, LLC',
+            'PHH MORTGAGE CORPORATION',
+            # 'SUNTRUST MORTGAGE, INC.', # DIVISION OF SUNTRUST BANK
+            # 'GETEWAY MORTGAGE,A DIVISION OF GATEWAY FIRST BANK',
+            'CMG MORTGAGE, INC.', # 
+            'CITIMORTGAGE, INC.', #DIVISION OF CITIBANK
+            'PLAZA HOME MORTGAGE, INC.',
+            'WESTSTAR MORTGAGE CORPORATION',
+            'FIRST GUARANTY MORTGAGE CORPORATION',
+            'NATIONSTAR MORTGAGE LLC',
+            'ARC HOME LLC',
+            'WINTRUST MORTGAGE',
+            'DBA FREEDOM HOME MORTGAGE CORP',
+            'GUILE MORTGAGE COMPANY LLC',
+            'ON Q FINANCIAL, INC.',
+            'AMERICAN FINANCIAL RESOURCES, INC.',
+            'UNITED SECURITY FINANCIAL CORP'
+            ]
+""" List of mortagaes servicers that are not banks. """
+
 # * stat functions
 
 def coeff_var(x):
@@ -137,6 +172,9 @@ stats_auction = [
 """ Statistics to be calculated on the auction data."""
 
 def winsorize_series(s, lower, upper):
+    """ 
+    Function to winsorize a series between two quantiles.
+    """
 #    clipped = s.clip(lower=s.quantile(lower), upper=s.quantile(upper), axis=1)
     quantiles = s.quantile([lower, upper])
     q_l = quantiles.loc[lower]
@@ -147,7 +185,7 @@ def winsorize_series(s, lower, upper):
                   )
 
     return out
-""" Function to winsorize a series between two quantiles."""
+
 
 #%%
 # * main functions
@@ -167,6 +205,44 @@ def read_data():
     except Exception as e:
         print('Error reading the data: ',filepath, ", ", e)
         return None
+    
+def adding_investors_information(df):
+    """
+    Adds investors information to the dataframe and returns the merged dataframe.
+    """
+
+    # read crosswalks file
+    df_crosswalk = pd.read_stata(f'{crosswalk_folder}/{crosswalk_investors_filename}')
+    df_crosswalk.rename(columns={'o_CommittedInvestorKey': 'CommittedInvestorKey'}, inplace=True)
+
+    # merge to int
+    df_crosswalk['CommittedInvestorKey'] = df_crosswalk['CommittedInvestorKey'].astype(int)
+    df['CommittedInvestorKey'] = df['CommittedInvestorKey'].astype(int)
+    # merge with df on CommittedInvestorKey
+    df = df.merge(df_crosswalk, on='CommittedInvestorKey',  how='left')
+
+    print("Number of investors keys in Ob", df["CommittedInvestorKey"].nunique())
+    print("Number of investors keys in crosswalk", df_crosswalk["CommittedInvestorKey"].nunique())
+    df_not_in_crosswalk = df[~df['CommittedInvestorKey'].isin(df_crosswalk['CommittedInvestorKey'])]
+    # print("Unmatched investor keys", df_not_in_crosswalk["CommittedInvestorKey"].unique())
+
+    # * classify investors by investor's name (InvestorName) no banks list
+    # print("Investors names: ", df['issuername'].unique())
+    df['bank'] = np.where(~df['issuername'].isin(no_banks),1, 0)
+    banks = df[df['bank'] == 1]['issuername'].unique()
+    print("Banks names: ", banks)
+    print("Number of banks: ", len(banks))
+    print("Number of non-banks: ", df[df['bank'] == 0]['issuername'].nunique())
+
+    # create number of banks by loan
+    df['number_banks'] = df.groupby(['Auction ID'])['bank'].transform('sum')
+    df['fraction_banks'] = df['number_banks']/df['Number of Participants']
+
+    # ? Note: If 99999 is -1, 99999 is nan, 17, 22, 23, 51 are GSEs. Then there are missing investors: 58 - 43 - 6 = 9
+
+    return df
+
+
 
 def read_get_security_characteristics():
     """
@@ -318,6 +394,8 @@ def create_measures_collapse(df):
                                         'sold_GSE': 'max',
                                         'bulk_bidders_fraction': 'max',
                                         's_coupon': 'first',
+                                        'number_banks' : 'first',
+                                        'fraction_banks' : 'first'
                                         }).reset_index()
     
 
@@ -423,6 +501,8 @@ def to_time_series(df, bynote=False,
                         'bulk_bidders_fraction': 'mean',
                         'price_fanny': 'mean',
                         'price_freddie': 'mean',
+                        'number_banks' : 'mean',
+                        'fraction_banks' : 'mean',
                         # 'loan_weight' : 'sum'
                     }
     
@@ -555,9 +635,17 @@ def main():
     # only means
     df1[cols_describe].mean()
     # %%
+
+    # * adding investors information
+    df1 = adding_investors_information(df1)
+
+
+    # %%
+
+
     # ***************** data at auction level *****************
 
-    # df_auc = create_measures_collapse(df1)
+    df_auc = create_measures_collapse(df1)
 
     # %%
     # # ***************** read data at auction level clean *****************
@@ -587,10 +675,10 @@ def main():
     # %%
     # * case in which sold to anyone = 0 (Committed is not in bids) and sold to Winner = 1 (highest bid is Commited) -> imposible
     #! what is 99999 key -> nan , CommittedInvestorKey
-    auc_ID = df_auc[(df_auc['dummy_sell_any']==0) & (df_auc['dummy_sell_winner']==1)]['Auction ID'].unique()
-    df1[df1['Auction ID'].isin(auc_ID)][[
-        'Auction ID','CommittedInvestorKey', 'HedgeInvestorKey', 'HedgeClientKey', 
-        'WinnerHedgeInvestorKey','Price','dummy_sell_winner']].head(35)
+    # auc_ID = df_auc[(df_auc['dummy_sell_any']==0) & (df_auc['dummy_sell_winner']==1)]['Auction ID'].unique()
+    # df1[df1['Auction ID'].isin(auc_ID)][[
+    #     'Auction ID','CommittedInvestorKey', 'HedgeInvestorKey', 'HedgeClientKey', 
+    #     'WinnerHedgeInvestorKey','Price','dummy_sell_winner']].head(35)
     
     #%%
     # * quantifying how many Nan bidders in df_auc 99999.0
@@ -660,16 +748,16 @@ def main():
 
 
     print("*********  intervals  *********")
-    for (min_nr, max_nr) in list:
+    for (min_, max_) in list:
 
-        print("********* ", min_nr, " - ", max_nr, "  *********")
-        df_auc_1 = df_auc[ (df_auc[var_rate] >= min_nr) & (df_auc[var_rate] <= max_nr)].copy()
+        print("********* ", min_, " - ", max_, "  *********")
+        df_auc_1 = df_auc[ (df_auc[var_rate] >= min_) & (df_auc[var_rate] <= max_)].copy()
 
         df_time_series3 = to_time_series(df_auc_1, 
                                         bynote=False, 
                                         var_time='MonthYear',
                                         var_rate= var_rate,
-                                        add_name= f'{var_rate}_{min_nr}_{max_nr}_{var_time}_auctype',
+                                        add_name= f'{var_rate}_{min_}_{max_}_{var_time}_auctype',
                                         groupby_other = ['auction_type']
                                         )
 
@@ -677,7 +765,7 @@ def main():
                                 bynote=False, 
                                 var_time='MonthYear',
                                 var_rate= var_rate,
-                                add_name= f'{var_rate}_{min_nr}_{max_nr}_{var_time}_agg',
+                                add_name= f'{var_rate}_{min_}_{max_}_{var_time}_agg',
                                 groupby_other = []
                                 )
     
