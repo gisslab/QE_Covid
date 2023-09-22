@@ -739,6 +739,15 @@ def main():
                 varrate = '', fig = f, ax = a, color = 'tab:orange', legend=True, legendlabel = 'Freddie Mac', save=True)
     # f,a = plot(ts, 'sold_GinnieBid_mean', maturity, initial_stat = "fraction sold", fig = f, ax = a, color = 'tab:green', legend=True, legendlabel = 'Ginnie Mae', save=True)
 
+    # %%
+    # * Enterprise sold coupon 2.5
+    coupon = 2.5
+    ts_coupon = ts[ts['Coupon'] == coupon].copy()
+    #! maybe this makes more sense for all bids not only auction type, not separate coupons
+    f,a = plot(ts_coupon, 'sold_FannieBid_mean', maturity, initial_stat = "fraction sold", empty_label = True, 
+                color = 'tab:blue', legend=True, legendlabel = 'Fannie Mae', save=False, varrate = '', filenameend=f'c{coupon*10}')
+    f,a = plot(ts_coupon, 'sold_FreddieBid_mean', maturity, initial_stat = "fraction sold", empty_label = True,
+                varrate = '', fig = f, ax = a, color = 'tab:orange', legend=True, legendlabel = 'Freddie Mac', save=True, filenameend=f'c{coupon*10}')
     # %% 
     # * sold GSE
     plot(df_ts_month, 'sold_GSE_mean', maturity, initial_stat = "Fraction sold to GSE", empty_label = True, 
