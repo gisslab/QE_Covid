@@ -439,7 +439,7 @@ if __name__ == '__main__':
             legend = True,
             interval= None, 
             normalization_var= 'PX_Last',
-            filenameend="coup2.5"
+            filenameend=""
     )   
 
     # %%
