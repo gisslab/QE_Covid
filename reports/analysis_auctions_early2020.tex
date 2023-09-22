@@ -1,6 +1,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Created on Mon June 5, 2023
 % @author: Giselle Labrador Badia (@gisslab)
+% Last modified: Friday Sept 22, 2023 
+
+% Description:
 %
 % This report analyses OB auction files for the early Covid period. 
 % It is based on the code files auction_prices_analysis.py, 
@@ -181,7 +184,7 @@ To analyze the OB auctions, we merge track each loan that was auctioned to know 
 \begin{table}[h]
   \centering
   \input{../results/tables/auctions_coupon__mat30_loan1.tex}
-  \caption{Descriptive statistics at the auction level January and February 2020. }
+  \caption{Note rate by coupon statistics from January 2020 to December 2021 }
   \begin{minipage}{\textwidth}
       \footnotesize{\textit{Notes:} The table shows descriptive statistics at the auction level of observation for the period January 2020 to December 2021.
      The product is Conforming loans with a 30-year maturity. } 
@@ -189,13 +192,40 @@ To analyze the OB auctions, we merge track each loan that was auctioned to know 
 \end{table}
 
 
-For this analysis, we define net bid as the difference between the auctions in OB and the TBA Bloomberg price on the day of the auction. Hence, the collapsed OB auction bids are merged by coupon with the TBA Bloomberg price. We focus on conforming loans with a 30-year maturity with 2 months forward.
+For this analysis, we define net bid as the difference between the auctions in OB and the TBA Bloomberg price on the day of the auction. Hence, the collapsed OB auction bids are merged by coupon with the TBA Bloomberg price. We focus on conforming loans with a 30-year maturity with 2 months forward. Specially for 2.5 and 3.0 there is a steep decline in the mean note rate pool in the coupons. 
+
+To take a closer look to how the note rates were distributed by coupon, we plot the minimum, maximimum, and mean note rates by coupon over time. 
+
+\begin{figure}[h]
+  \centering
+  \begin{subfigure}[b]{0.49\textwidth}
+      \includegraphics[width=0.998\textwidth]{../results/figures/NoteRate_mean_mat30_loan1_timeseries_nrmonthly_2.5_4_c25.0.pdf}
+      \caption{ Coupon 2.5}
+     \end{subfigure}
+      \begin{subfigure}[b]{0.49\textwidth}
+        \includegraphics[width=0.998\textwidth]{../results/figures/NoteRate_mean_mat30_loan1_timeseries_nrmonthly_2.5_4_c30.0.pdf}
+        \caption{ Coupon 3.0}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.49\textwidth}
+          \includegraphics[width=0.998\textwidth]{../results/figures/NoteRate_mean_mat30_loan1_timeseries_nrmonthly_2.5_4_c35.0.pdf}
+          \caption{ Coupon 3.5}
+          \end{subfigure}
+        \begin{subfigure}[b]{0.49\textwidth}
+          \includegraphics[width=0.998\textwidth]{../results/figures/NoteRate_mean_mat30_loan1_timeseries_nrmonthly_2.5_4_c40.0.pdf}
+          \caption{ Coupon 4.0}
+          \end{subfigure}
+   \caption{Note rates by coupons over time} 
+   \begin{minipage}{\textwidth}
+      \footnotesize{\textit{Notes:} The figure shows the time series of auction outcomes for Conforming loans with a 30-year maturity.  The vertical line is March 1.}
+      \end{minipage}
+\end{figure}
 
 
-% \pagebreak
+
+\pagebreak
 \subsection{Prices and Quantities}
 
-The following figures show OB auctions mean, median higher bid, quantities, and the number of auctions that occurred daily from January 1st to December 31st,  2021. We focus on 2.5, 3.0, and 4.0 coupons. 
+The following figures show OB auctions mean, median higher bid, quantities, and the number of auctions that occurred daily from July 2019 to December 31st,  2021. We focus on 2.5, 3.0, 3.5 and 4.0 coupons. 
 
 %April 30th, 2020.
 
@@ -285,7 +315,7 @@ Below, we show distress and illiquidity measures in the OB auctions during the e
 \item \textbf{Days to auction}: Number of days between the auction date and the date the loan originated.
 \item \textbf{Number of participants}: Number of participants in the auction.
 \item  \textbf{Winner Sell rate:} Rate to which the loan is sold to the auction participant with the highest bid. Since the highest bid is not always the winning bid because sometimes the winner's bid is missing, and other times the committed investor is not the one with the highest bid. 
-\item \textbf{Fraction of bulk bidders:} Fraction of bids that are bulk bids.
+\item \textbf{Number of bulk bidders:} Bulk bids are bids where delivery method bulk.
 \end{itemize}
 \begin{figure}[h]
   \centering
@@ -301,11 +331,40 @@ Below, we show distress and illiquidity measures in the OB auctions during the e
       \includegraphics[width=0.998\textwidth]{../results/figures/dummy_sell_winner_mean_mat30_loan1_timeseries_nrmonthly_2.5_4_.pdf}
       \caption{ Winner sell rate}
       \end{subfigure}
+      \begin{subfigure}[b]{0.49\textwidth}
+        \includegraphics[width=0.998\textwidth]{../results/figures/Number of Bulk Bidders_mean_mat30_loan1_timeseries_nrmonthly_2.5_4_.pdf}
+        \caption{ Number of bulk bidders}
+       \end{subfigure}
+     \caption{OB auction outcomes } 
+   \begin{minipage}{\textwidth}
+      \footnotesize{\textit{Notes:} The figure shows time series of auction outcomes for Conforming loans with a 30-year maturity. The vertical line is March 1.  } 
+      \end{minipage}
+\end{figure}
+
+\pagebreak
+\subsubsection{Bulk bidders}
+
+Now, we examine the number of bulk bidders in the OB auctions and the number of participants that are banks.
+
+\begin{figure}[h]
+  \centering
+  \begin{subfigure}[b]{0.49\textwidth}
+    \includegraphics[width=0.998\textwidth]{../results/figures/bulk_bidders_fraction_mean_mat30_loan1_timeseries_nrmonthly_2.5_4_.pdf}
+    \caption{ Fraction of bulk bidders}
+   \end{subfigure}
      \begin{subfigure}[b]{0.49\textwidth}
-      \includegraphics[width=0.998\textwidth]{../results/figures/bulk_bidders_fraction_mean_mat30_loan1_timeseries_nrmonthly_2.5_4_.pdf}
-      \caption{ Fraction of bulk bidders}
+      \includegraphics[width=0.998\textwidth]{../results/figures/bulk_bidders_fraction_mean_mat30_loan1_timeseries_cpmonthly_2.5_4_.pdf}
+      \caption{ Fraction of bulk bidders by coupon}
      \end{subfigure}
-     \caption{OB auction outcomes. } 
+     \begin{subfigure}[b]{0.49\textwidth}
+      \includegraphics[width=0.998\textwidth]{../results/figures/fraction_banks_mean_mat30_loan1_timeseries_nrmonthly_2.5_4_.pdf}
+      \caption{  Number of bank bidders}
+     \end{subfigure}
+       \begin{subfigure}[b]{0.49\textwidth}
+        \includegraphics[width=0.998\textwidth]{../results/figures/fraction_banks_mean_mat30_loan1_timeseries_cpmonthly_2.5_4_.pdf}
+        \caption{ Fraction of the nuber of bank bidders by coupon}
+       \end{subfigure}
+     \caption{Bulk bidders and bank participants} 
    \begin{minipage}{\textwidth}
       \footnotesize{\textit{Notes:} The figure shows time series of auction outcomes for Conforming loans with a 30-year maturity. The vertical line is March 1.  } 
       \end{minipage}
@@ -319,24 +378,45 @@ Below, we show distress and illiquidity measures in the OB auctions during the e
 \begin{itemize}
 % \item \textbf{Number of Enterprise Bids}: Number of bids per auction submitted by the GSEs (Fannie and Freddie).
 \item \textbf{Fraction of loans sold to GSE}: Fraction of loans sold to the GSEs.
+\item \textbf{GSE highest bid}: Highest bid in an auction where the GSE is the committed investor.
 \end{itemize}
 
 \begin{figure}[h]
   \centering
   \begin{subfigure}[b]{0.49\textwidth}
       \includegraphics[width=0.998\textwidth]{../results/figures/sold_GSE_mean_mat30_loan1_timeseries_nrmonthly_2.5_4_.pdf}
-      \caption{Fraction loans sold GSE in OB. }
+      \caption{Fraction loans sold GSE in OB }
      \end{subfigure}
      \begin{subfigure}[b]{0.49\textwidth}
       \includegraphics[width=0.998\textwidth]{../results/figures/sold_FreddieBid_mean_mat30_loan1_timeseries_nrmonthly_2.5_4_.pdf}
-      \caption{ Fraction of loans sold to GSE by enterprise. }
+      \caption{ Fraction of loans sold to GSE by enterprise }\label{fig:gse_loans}
      \end{subfigure}
-     \caption{OB auction  GSE response. } 
+     \caption{OB auction  GSE response } 
    \begin{minipage}{\textwidth}
       \footnotesize{\textit{Notes:} The figure shows time series of auction outcomes for Conforming loans with a 30-year maturity. The vertical line is March 1.  } 
       \end{minipage}
 \end{figure}
 
+\pagebreak
+\subsubsection{GSE bids difference}
+
+Next, to understand the differences between Fannie and Freddie in \ref{fig:gse_loans}, we plot the difference between the highest bids in auctions where Fannie is the committed investor and Freddie is the committed investor. 
+
+\begin{figure}[h]
+  \centering
+  \begin{subfigure}[b]{0.49\textwidth}
+      \includegraphics[width=0.998\textwidth]{../results/figures/price_freddie_mean_mat30_loan1_timeseries_nrmonthly_2.5_4_byGSE_c25.pdf}
+      \caption{Average bids for Freddie and Fannie} % Todo: Have 2.5 loan
+     \end{subfigure}
+     \begin{subfigure}[b]{0.49\textwidth}
+      \includegraphics[width=0.998\textwidth]{../results/figures/price_diff_ma_mat30_loan1_timeseries_nrmonthly_2.5_4_diffFF_ma5_c25.pdf}
+      \caption{ Bid difference between Freddie and Fannie.}
+     \end{subfigure}
+     \caption{OB auction  GSE response for coupon 2.5 } 
+   \begin{minipage}{\textwidth}
+      \footnotesize{\textit{Notes:} The figure shows time series of auction outcomes for Conforming loans with a 30-year maturity. The vertical line is March 1.  } 
+      \end{minipage}
+\end{figure}
 
 \pagebreak
 \subsubsection{Comparison GSE vs non-GSE}
@@ -350,37 +430,57 @@ Now we compare the highest bids of the auctions when the GSE is the committed in
 
 See ideally, we will plot the accepted bids, but these are not always in the data. Actually, 27 \% of auctions for this type of loan do not have the committer investors bid (70 \%  of times the bid is not in sample the GSE is the committed investor). 
 
+
+\begin{figure}[h]
+  \centering
+     \begin{subfigure}[b]{0.49\textwidth} 
+      \includegraphics[width=0.998\textwidth]{../results/figures/w_winner_bid_mean_n_mat30_loan1_timeseries_nrmonthly_2.5_4_auction_netbid.pdf}
+      \caption{ auction}
+     \end{subfigure}
+     \begin{subfigure}[b]{0.49\textwidth}
+      \includegraphics[width=0.998\textwidth]{../results/figures/w_winner_bid_mean_n_mat30_loan1_timeseries_nrmonthly_2.5_4_cash_window_netbid.pdf}
+      \caption{cash window}
+     \end{subfigure}
+   \caption{Mean of highest net bid when investor buys (auction) and when GSE buys (cash window)} 
+   \begin{minipage}{\textwidth}
+      \footnotesize{\textit{Notes:} The figure shows the time series of auction outcomes for Conforming loans with a 30-year maturity.  The vertical line is March 1. The net bid is calculated by subtracting the TBA Bloomberg price for the same coupon and two forward months from the OB auction price. 
+      The net bids are averaged accross coupons from 2.5 and 4.0 weighting by the loan amount. }
+      \end{minipage}
+\end{figure}
+
+
+
 \begin{figure}[]
   \centering
      \begin{subfigure}[b]{0.49\textwidth}
       \includegraphics[width=0.998\textwidth]{../results/figures/LoanAmount_sum_mat30_loan1_timeseries_cpmonthly_2.5_4_auction.pdf}
-      \caption{Loan amount auction.}
+      \caption{Loan amount auction}
      \end{subfigure}
       \begin{subfigure}[b]{0.49\textwidth}
         \includegraphics[width=0.998\textwidth]{../results/figures/LoanAmount_sum_mat30_loan1_timeseries_cpmonthly_2.5_4_cash_window.pdf}
-        \caption{Loan amount cash window.}
+        \caption{Loan amount cash window}
         \end{subfigure}
      \begin{subfigure}[b]{0.49\textwidth}
       \includegraphics[width=0.998\textwidth]{../results/figures/winner_bid_mean_mat30_loan1_timeseries_cpmonthly_2.5_4_auction_netbid.pdf}
-      \caption{ Mean of highest net bid auction.}
+      \caption{ Mean of highest net bid auction}
      \end{subfigure}
      \begin{subfigure}[b]{0.49\textwidth}
       \includegraphics[width=0.998\textwidth]{../results/figures/winner_bid_mean_mat30_loan1_timeseries_cpmonthly_2.5_4_cash_window_netbid.pdf}
-      \caption{ Mean of highest net bid cash window.}
-     \end{subfigure}
-     \begin{subfigure}[b]{0.49\textwidth}
-      \includegraphics[width=0.998\textwidth]{../results/figures/winner_bid_mean_mat30_loan1_timeseries_cpmonthly_2.5_4_cash_window_netbid.pdf}
-      \caption{ Mean of highest net bid auction.}
+      \caption{ Mean of highest net bid cash window}
      \end{subfigure}
      \begin{subfigure}[b]{0.49\textwidth}
       \includegraphics[width=0.998\textwidth]{../results/figures/winner_bid_median_mat30_loan1_timeseries_cpmonthly_2.5_4_cash_window_netbid.pdf}
-      \caption{ Median of highest net cash window..}
+      \caption{ Median of highest net bid auction}
+     \end{subfigure}
+     \begin{subfigure}[b]{0.49\textwidth}
+      \includegraphics[width=0.998\textwidth]{../results/figures/winner_bid_median_mat30_loan1_timeseries_cpmonthly_2.5_4_cash_window_netbid.pdf}
+      \caption{ Median of highest net cash window.}
      \end{subfigure}
       % \begin{subfigure}
       %   \includegraphics[width=0.998\textwidth]{../results/figures/winner_bid_median_mat30_loan1_timeseries_cpmonthly_2.5_4_cash_window_netbid.pdf}
       %   \caption{ Median of highest net bid cash window.}
       %   \end{subfigure}
-   \caption{OB auction outcomes. } 
+   \caption{OB auction outcomes when investor buys (auction) and when GSE buys (cash window) by coupons. } 
    \begin{minipage}{\textwidth}
       \footnotesize{\textit{Notes:} The figure shows the time series of auction outcomes for Conforming loans with a 30-year maturity.  The vertical line is March 1. The net bid is calculated by subtracting the TBA Bloomberg price for the same coupon and two forward months from the OB auction price. }
       \end{minipage}
@@ -388,8 +488,6 @@ See ideally, we will plot the accepted bids, but these are not always in the dat
 
 
 \pagebreak
-
-
   \section{FED and Ob auction prices}
 
   In order to compare the FED and OB auction prices, we need to match the FED purchases with the OB auctions. We do this by matching coupon and trade date. We plot only Coupon 2.5 since it is the most traded coupon. The Bloomberg TBA price is one month forward.
