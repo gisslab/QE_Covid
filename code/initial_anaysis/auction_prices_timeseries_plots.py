@@ -733,7 +733,7 @@ def main():
     # %%
     # * Enterprise sold
     #! maybe this makes more sense for all bids not only auction type, not separate coupons
-    f,a = plot(df_ts_month, 'sold_FannieBid_mean', maturity, initial_stat = "fraction sold", empty_label = True, 
+    f,a = plot(df_ts_month, 'sold_FannieBid_mean', maturity, initial_stat = "Fraction sold", empty_label = True, 
                 color = 'tab:blue', legend=True, legendlabel = 'Fannie Mae', save=False, varrate = '',)
     f,a = plot(df_ts_month, 'sold_FreddieBid_mean', maturity, initial_stat = "fraction sold", empty_label = True,
                 varrate = '', fig = f, ax = a, color = 'tab:orange', legend=True, legendlabel = 'Freddie Mac', save=True)
@@ -744,7 +744,7 @@ def main():
     coupon = 2.5
     ts_coupon = ts[ts['Coupon'] == coupon].copy()
     #! maybe this makes more sense for all bids not only auction type, not separate coupons
-    f,a = plot(ts_coupon, 'sold_FannieBid_mean', maturity, initial_stat = "fraction sold", empty_label = True, 
+    f,a = plot(ts_coupon, 'sold_FannieBid_mean', maturity, initial_stat = "Fraction sold", empty_label = True, 
                 color = 'tab:blue', legend=True, legendlabel = 'Fannie Mae', save=False, varrate = '', filenameend=f'c{coupon*10}')
     f,a = plot(ts_coupon, 'sold_FreddieBid_mean', maturity, initial_stat = "fraction sold", empty_label = True,
                 varrate = '', fig = f, ax = a, color = 'tab:orange', legend=True, legendlabel = 'Freddie Mac', save=True, filenameend=f'c{coupon*10}')
@@ -762,7 +762,10 @@ def main():
     # * GSE prices mean (w if weighted)
     
     ts_ob_bl_collapsed['price_diff'] = ts_ob_bl_collapsed['price_fanny_mean'] - ts_ob_bl_collapsed['price_freddie_mean']
+    # calculate loan amount diff
+    ts_ob_bl_collapsed['sold_FF_diff'] = ts_ob_bl_collapsed['sold_FannieBid_mean'] - ts_ob_bl_collapsed['sold_FreddieBid_mean']
     ts_ob_bl_collapsed_c25 = ts_ob_bl_collapsed[ts_ob_bl_collapsed['Coupon'] == 2.5].copy()
+
     
 
     f,a = plot(ts_ob_bl_collapsed_c25, 'price_fanny_mean', maturity, initial_stat =  "Highest bid (mean) difference", empty_label = True, normalization_var= 'PX_Last' ,
@@ -781,10 +784,13 @@ def main():
     # moving average
     # %%
     # * moving average
-    nma = 5
+    nma = 3
     ts_ob_bl_collapsed_c25['price_diff_ma'] = ts_ob_bl_collapsed_c25['price_diff'].rolling(window=nma).mean()
-    plot(ts_ob_bl_collapsed_c25, 'price_diff_ma', maturity, initial_stat = "highest bid (mean) difference", empty_label = True, 
+    f,a = plot(ts_ob_bl_collapsed_c25, 'price_diff_ma', maturity, initial_stat = "highest bid (mean) difference", empty_label = True,   
                 color = 'tab:blue', save=True, varrate = '', filenameend=f'diffFF_ma{nma}_c25')
+    # add sold diff -> this you have to do by using differenty axis #Todo
+    # plot(ts_ob_bl_collapsed_c25, 'sold_FF_diff', maturity, initial_stat = "", empty_label = True,
+
     # %%
     # * Number of banks in the auction
     var = 'number_banks_mean'
