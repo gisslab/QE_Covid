@@ -104,7 +104,9 @@ def read_data(file, path, cols = cols, maturity = maturity):
         df = None
     return df
 
-def process(df_raw):
+def process(df_raw, 
+            date_init = date_init,
+            date_end = date_end):
     """
     Processes the data by filtering by date, maturity and agency.
     """
@@ -269,6 +271,15 @@ if __name__ == '__main__':
     df.head(15)
     # %%
     df.columns 
+
+    # %%
+    # * banks that sell or buy to FED
+    print("numer of unique banks: ", df.counterparty.nunique())
+    df.counterparty.value_counts()
+
+    # %%
+    ## nans in counterparty
+    print("Number of nans in counterparty: ", df.counterparty.isnull().sum(), "from ", df.shape[0], "observations")
     # %%
     df.describe()
 

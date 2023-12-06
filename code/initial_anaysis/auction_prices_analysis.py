@@ -641,8 +641,11 @@ def main():
     df1[cols_describe].mean()
     # %%
 
-    # * adding investors information
+    # * adding investors' information
     df2 = adding_investors_information(df1)
+
+    # save data with investor names at bid level
+    df2.to_csv(f'{auction_save_folder}/{auction_filename}_mat{maturity}_loan{loantype}.csv', sep='|', index=False)
 
 
     # %%
