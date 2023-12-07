@@ -1,0 +1,52 @@
+// ******************************************
+// Author : Gielle Labrador Badia
+// Date 12/06/2023
+
+// ******************************************
+
+
+local winstat = 1
+
+if `winstat' ==0{
+	glo path_wrk = ""
+}
+else {
+	glo path_wrk = "V:/houde/mortgages/QE_Covid"
+}
+
+glo data_path = "$path_wrk/data/data_auction/clean_data"
+
+
+cd "$data_path"
+
+import delimited "ob_fed_exposure_measure.csv", clear 
+
+// ******************************************
+encode firstmonthyear, gen(t)
+
+// ******************************************
+local controls = ""
+local sample = ""
+local fe = "hedgeclientkey committedinvestorkey coupon"
+
+
+
+local yvar = "loanamount_mean"
+
+reghdfe `yvar'  i.exposure##ib0.t `controls'  `sample', absorb(`fe') vce(robust)
+est store est1
+
+// esttab est1,se r2 ar2 scalar(F)    keep(1.exposure#*)
+
+stop
+// ******************************************
+local yvar = "winner_bid_max"
+
+
+
+reghdfe `yvar'  i.exposure##ib0.t `controls'  `sample', absorb(`fe') vce(robust)
+est store est2
+
+// esttab est1,se r2 ar2 scalar(F)  keep(1.exposure#*)
+
+// 

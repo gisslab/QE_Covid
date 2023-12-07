@@ -371,7 +371,7 @@ def create_measures_collapse(df):
                                         'CommittedPrice': 'first',
                                         'CommittedInvestorKey': 'first',
                                         'WinnerHedgeInvestorKey': 'first',
-                                        'HedgeClientKey' : 'first', #! check this
+                                        'HedgeClientKey' : 'first', 
                                         'CommittedDate': 'first',
                                         'MonthYear': 'first',
                                         'FirstMonthYear': 'first',
