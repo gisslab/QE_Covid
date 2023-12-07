@@ -397,6 +397,8 @@ if __name__ == '__main__':
     df['fed_trade_amount_march_2020'] = df['fed_trade_amount_march_2020'].fillna(0)
     # if is equal any other month make equal to ['FirstMonthYear','CommittedInvestorKey', 'Coupon'] fed_trade_amount march 2020
     df['fed_trade_amount_march_2020'] = df.groupby(['CommittedInvestorKey', 'Coupon'])['fed_trade_amount_march_2020'].transform('max') 
+
+    df["exposure_march_2020"] = np.where(df['fed_trade_amount_march_2020'] > 0, 1, 0)
     # %%
     df1 = df[df['CommittedInvestorKey'] == 9]
     df1[['fed_trade_amount_march_2020','fed_trade_amount','CommittedInvestorKey', 'Coupon','FirstMonthYear']].head(50)
