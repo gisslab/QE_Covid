@@ -212,6 +212,7 @@ if __name__ == '__main__':
     fed_collapse[fed_collapse['counterparty'] == 'Citigroup Global Markets Inc.'].groupby('FirstMonthYear').sum()['fed_trade_amount'].plot()
 
     # %% 
+    # ********************************************* 
     # *  Plot City and JP Mprgan Chase BofA Securities, Inc.
 
     # convert to datetime
@@ -259,7 +260,7 @@ if __name__ == '__main__':
     plt.show()
 
     # save
-    fig.savefig(f'{save_fig}/fed_mbs_amount_by_month_example_retail.png', dpi=300)
+    fig.savefig(f'{save_fig}/fed_mbs_amount_by_month_example_retail.pdf')
 
     # %% 
     # * Repat now for five 4 investors 
@@ -301,7 +302,7 @@ if __name__ == '__main__':
     plt.show()
 
     # save
-    fig.savefig(f'{save_fig}/fed_mbs_amount_by_month_example_larg4.png', dpi=300)
+    fig.savefig(f'{save_fig}/fed_mbs_amount_by_month_example_larg4.pdf')
 
     # %%
     # * 
