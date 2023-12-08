@@ -24,7 +24,7 @@
 \bibliographystyle{apacite}
 
 
-\usepackage[margin = 1in, top=1.5cm,bottom=1.5cm]{geometry}% Margins
+\usepackage[margin = 1in, top=2.0cm,bottom=1.5cm]{geometry}% Margins
 \setlength{\parindent}{2em}
 \setlength{\parskip}{0.3em}
 \usepackage{setspace} % Setting the spacing between lines
@@ -46,12 +46,37 @@
 
 \begin{document}
 
-\title{Effects of QE on Ob Auctions \\ Dynamic DiD Exposure Analysis}
+\title{Effects of QE on O.B. Auctions \\ Dynamic DiD Exposure Analysis}
 
 \maketitle
 
 \section{FED purchases and investors}
 
+The following figures show the daily time series of amounts and prices of FED purchases of MBAs for Fannie Mae and Freddie Mac
+ products and 30-year maturity in the early COVID period. We plot by month the total amount by coupon and the mean price. 
+ %If it only shows a dot is because there is only one month of data for that coupon. The period is January 2020 to April 2021. 
+ The prices and quantities are aggregated monthly by trade date. 
+
+
+\begin{figure}[h]
+    \centering
+    \begin{subfigure}[b]{0.49\textwidth}
+      \includegraphics[width=0.998\textwidth]{../results/figures/fed_monthly_trade_amount_by_coupon.png}
+      \caption{ Quantity by trade date}
+     \end{subfigure}
+     \begin{subfigure}[b]{0.49\textwidth}
+      \includegraphics[width=0.998\textwidth]{../results/figures/fed_monthly_price_mean_by_coupon.png}
+      \caption{ Price by trade date}
+     \end{subfigure}
+     \caption{FED purchases of Fannie Mae and Freddie Mac MBS securities  in the early COVID period} 
+     \begin{minipage}{\textwidth}
+      \footnotesize{\textit{Notes:} The figure shows the monthly time series of trade amounts and prices of FED purchases of Fanny Mae and Fredy Mac products and 30-year maturity. Colors represent different coupons. } 
+        \end{minipage}
+\end{figure}
+
+\pagebreak
+
+Below, we show the amount of MBS purchased by the FED to each investor.
 \begin{table}[h]
     \centering
     \input{../results/tables/fed_mbs_amount_by_counterparty.tex}
@@ -66,12 +91,12 @@ There are 931 from  14873 observations in this period that have a missing counte
 \pagebreak
 \begin{figure}[h]
     \centering
-    \begin{subfigure}[b]{0.65\textwidth}
-        \includegraphics[width=0.98\textwidth]{../results/figures/fed_mbs_amount_by_month_example_larg4.png}
+    \begin{subfigure}[b]{0.7\textwidth}
+        \includegraphics[width=0.98\textwidth]{../results/figures/fed_mbs_amount_by_month_example_larg4.pdf}
         \caption{Largest 4 investors that sold loans to the FED.}\label{fig:larg4}
        \end{subfigure}
-       \begin{subfigure}[b]{0.65\textwidth}
-        \includegraphics[width=0.999\textwidth]{../results/figures/fed_mbs_amount_by_month_example_retail.png}
+       \begin{subfigure}[b]{0.7\textwidth}
+        \includegraphics[width=0.999\textwidth]{../results/figures/fed_mbs_amount_by_month_example_retail.pdf}
         \caption{ Commercial banks } 
        \end{subfigure}
        \caption{FED MBS purchases by month.}\label{fig:fed_mbs_amount_by_month}
@@ -99,9 +124,11 @@ There are 931 from  14873 observations in this period that have a missing counte
 
 The dynamic DiD analysis is based on the following equation:
 $$y_{ijtc} = \alpha + \sum_\tau \beta_\tau \times 1({\tau}=t)  \times QE_{i} + \nu_{t,c} + \nu_{t,i} +\psi_{j} + \epsilon_{ijtc}$$
-where $y_{ijtc}$ is rate of winner bid or loan amount for loans sold to investor $i$ from seller $j$ in month $t$ for coupon segment $c$. The variable $QE_{i}$ is either the exposure dummy or the exposure amount. The exposure level is calculated as the amount of MBS purchased by the FED in March 2020. When a dummy is used, the variable takes the value of 1 if the investor has exposure and 0 otherwise. 
+where $y_{ijtc}$ is rate of winner bid or loan amount for loans sold to investor $i$ from seller $j$ in month $t$ for coupon segment $c$. The variable $QE_{i}$ is either the exposure dummy or the exposure level. The exposure level is defined as the amount of MBS purchased by the FED in March 2020. When a dummy is used, the variable takes the value of 1 if the investor has exposure and 0 otherwise. 
 
-The investors that we could identify as having exposure are: J.P. Morgan Chase, Wells Fargo and Citibank. 
+The investors that we could identify as having exposure are J.P. Morgan Chase, Wells Fargo, and Citibank. The results are shown below.  The clearer effect is on the winning bid, there is an increase in the average winning bid after March 2020 for the exposed investors. Robustness checks on the fixed effects did not change the results.
+
+There is plenty of run for improvements here (more controls, improve crosswalks, use differences, logs, other outcomes like probability of wining, bid, use spread instead of winner bid, etc).
 \begin{figure}[h]
     \centering
     \begin{subfigure}[b]{0.49\textwidth}
@@ -114,7 +141,7 @@ The investors that we could identify as having exposure are: J.P. Morgan Chase, 
        \end{subfigure}
        \caption{Effect of QE on Ob Auctions using exposure dummy.}\label{fig:did_exp_amount}
      \begin{minipage}{\textwidth}
-        \footnotesize{\textit{Notes:} The figure shows a time series of auction outcomes for Conforming loans with a 30-year maturity. The vertical line is March 1.  } 
+        \footnotesize{\textit{Notes:}  The figure coefficients of the regression above for loan amounts and winner bid. The vertical line is March 1.  Robust standard errors are used. }
         \end{minipage}
   \end{figure}
   
@@ -131,7 +158,7 @@ The investors that we could identify as having exposure are: J.P. Morgan Chase, 
        \end{subfigure}
        \caption{Effect of QE on Ob Auctions using exposure amount purchase.}\label{fig:did_exp_amount}
      \begin{minipage}{\textwidth}
-        \footnotesize{\textit{Notes:} The figure shows a time series of auction outcomes for Conforming loans with a 30-year maturity. The vertical line is March 1.  } 
+        \footnotesize{\textit{Notes:}  The figure coefficients of the regression above for loan amounts and winner bid. The vertical line is March 1.  Robust standard errors are used. }
         \end{minipage}
   \end{figure}
   
