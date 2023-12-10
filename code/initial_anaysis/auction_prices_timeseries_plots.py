@@ -995,6 +995,10 @@ def main():
                 right=0.96,
                 hspace=0.01,
                 wspace=0.01)
+
+    # legend is not begin saved in pdf, save space to the right side after 1.0
+    # ax.legend(loc='upper left', bbox_to_anchor=(1.05, 1),title='Note rate')
+
     
     # create list of ticks and increse the onth by 3 for i in range(min_d.month, max_d.month + 1, 3)]
     all_dates_df = [pd.to_datetime(x) for x in monthyear]
@@ -1018,7 +1022,7 @@ def main():
     ax.set_title('Monthly trade amount by note rate')
     ax.set_ylabel('Trade amount (million $)')
     ax.set_xlabel('Year-Month')
-    plt.savefig(f'{auction_save_folder}/ob_monthly_trade_amount_by_noterate_all_area_legend_colors.pdf')    # %%
+    plt.savefig(f'{auction_save_folder}/ob_monthly_trade_amount_by_noterate_all_area_legend_colors.pdf', bbox_inches='tight')    # %%
 
     # %%
     # * version of graph with note rates is is a color map

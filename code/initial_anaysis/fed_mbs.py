@@ -512,6 +512,9 @@ if __name__ == '__main__':
     df_coupons = df_merged.groupby(['Coupon', 'FirstMonthYear'])['fed_trade_amount'].sum().reset_index()
     df_coupons.columns = [ 'Coupon', 'FirstMonthYear', 'fed_trade_amount']
 
+    # to billions divide by 1000
+    df_coupons['fed_trade_amount'] = df_coupons['fed_trade_amount'] / 1000
+
     print("Min date: ", df_coupons.FirstMonthYear.min())
     print("Max date: ", df_coupons.FirstMonthYear.max())
 
@@ -584,7 +587,7 @@ if __name__ == '__main__':
     ax.legend(handles[::-1], labels[::-1], loc='upper left',title='Coupon')
     # legend name Coupon
     ax.set_title('Monthly trade amount by coupon')
-    ax.set_ylabel('Trade amount (million $)')
+    ax.set_ylabel('Trade amount (billions $)')
     ax.set_xlabel('Year-Month')
     # plt.xticks(rotation=45)
     plt.savefig(f'{auction_save_folder}/figures/fed_monthly_trade_amount_by_coupon.pdf')
