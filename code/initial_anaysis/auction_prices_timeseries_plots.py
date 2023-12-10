@@ -922,7 +922,7 @@ def main():
     ax.set_title('Monthly trade amount by coupon')
     ax.set_ylabel('Trade amount (million $)')
     ax.set_xlabel('Year-Month')
-    plt.savefig(f'{auction_save_folder}/ob_monthly_trade_amount_by_coupon_all_area.png', dpi=300)
+    plt.savefig(f'{auction_save_folder}/ob_monthly_trade_amount_by_coupon_all_area.pdf')
 
     # %%
     # ***************************************** Note rate version ******************************************* #
@@ -934,19 +934,19 @@ def main():
     filename_timeseries_coup = f'{auction_filename}_mat{maturity}_loan{loantype}_timeseries_{var_rate}_{var_time}'
 
 
-    df_ts = read_data(file = f'timeseries/{filename_timeseries_coup}',
+    df_ts_nr = read_data(file = f'timeseries/{filename_timeseries_coup}',
                         path = auction_data_folder,
                         datetime_vars=['FirstMonthYear'])
 
 
-    ts_extended = tide_auction_data(df_ts,
+    ts_extended_nr = tide_auction_data(df_ts_nr,
                         varrate = var_rate,
                         interval= interval_extended,
                         setrates= [])
     # n
 
     # %%
-    df_noterates = ts_extended[['NoteRate', 'FirstMonthYear', 'LoanAmount_sum']].copy()
+    df_noterates = ts_extended_nr[['NoteRate', 'FirstMonthYear', 'LoanAmount_sum']].copy()
 
     df_noterates = df_noterates[(df_noterates.FirstMonthYear >= date_init_) & (df_noterates.FirstMonthYear <= date_end_)]
 
@@ -1018,7 +1018,7 @@ def main():
     ax.set_title('Monthly trade amount by note rate')
     ax.set_ylabel('Trade amount (million $)')
     ax.set_xlabel('Year-Month')
-    plt.savefig(f'{auction_save_folder}/ob_monthly_trade_amount_by_noterate_all_area_legend_colors.png', dpi=300)    # %%
+    plt.savefig(f'{auction_save_folder}/ob_monthly_trade_amount_by_noterate_all_area_legend_colors.pdf')    # %%
 
     # %%
     # * version of graph with note rates is is a color map

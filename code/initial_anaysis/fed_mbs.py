@@ -479,14 +479,26 @@ if __name__ == '__main__':
             right=0.96, 
             hspace=0.01, 
             wspace=0.01)
+    
+    all_dates_df = [pd.to_datetime(x) for x in monthyear]
+    list_ticks = [x.strftime('%Y-%m') for x in all_dates_df]
+    # leave only first quarter
+    list_ticks = [x for i,x in enumerate(list_ticks) if i % 3 == 0]
+    all_dates_df = [x for i,x in enumerate(all_dates_df) if i % 3 == 0]
+    print(list_ticks)
 
-    plt.legend(loc = 'upper right', title = 'Coupon')
+    plt.xticks(all_dates_df, list_ticks, rotation=45)
+
+    # get handler to change order legend
+    handles, labels = plt.gca().get_legend_handles_labels()
+    plt.legend(handles[::-1], labels[::-1], loc='upper left',title='Coupon')
+
     plt.title('Mean price by month')
     plt.xlabel('Year-Month')
     plt.ylabel('Mean price ($)')
     plt.xticks(rotation=45)
 
-    plt.savefig(f'{auction_save_folder}/figures/fed_monthly_price_mean_by_coupon.png', dpi=300)
+    plt.savefig(f'{auction_save_folder}/figures/fed_monthly_price_mean_by_coupon.pdf')
 
 
 
@@ -562,15 +574,8 @@ if __name__ == '__main__':
     
 
     # create list of ticks and increse the onth by 3 for i in range(min_d.month, max_d.month + 1, 3)]
-    all_dates_df =df_coupons.FirstMonthYear.sort_values().unique()
-    # convert to datetime
-    all_dates_df = [pd.to_datetime(x) for x in all_dates_df]
-    # now format dates to only show year-month
-    list_ticks = [x.strftime('%Y-%m') for x in all_dates_df]
-    # leave only first quarter
-    list_ticks = [x for i,x in enumerate(list_ticks) if i % 3 == 0]
-    all_dates_df = [x for i,x in enumerate(all_dates_df) if i % 3 == 0]
-    print(list_ticks)
+
+    
 
     # pass ticks to xticks
     plt.xticks(all_dates_df, list_ticks, rotation=45)
@@ -582,7 +587,7 @@ if __name__ == '__main__':
     ax.set_ylabel('Trade amount (million $)')
     ax.set_xlabel('Year-Month')
     # plt.xticks(rotation=45)
-    plt.savefig(f'{auction_save_folder}/figures/fed_monthly_trade_amount_by_coupon.png', dpi=300)
+    plt.savefig(f'{auction_save_folder}/figures/fed_monthly_trade_amount_by_coupon.pdf')
 
     # ***** End area graph for trade amount by coupon ***** #
 
