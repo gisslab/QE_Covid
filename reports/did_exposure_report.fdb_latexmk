@@ -1,5 +1,5 @@
 # Fdb version 3
-["pdflatex"] 1702237649 "/Users/gisellelab/Work/QE_Covid/reports/did_exposure_report.tex" "did_exposure_report.pdf" "did_exposure_report" 1702237650
+["pdflatex"] 1702238443 "/Users/gisellelab/Work/QE_Covid/reports/did_exposure_report.tex" "did_exposure_report.pdf" "did_exposure_report" 1702238444
   "../results/figures/did_loan_amount_expamount.pdf" 1702068285 57554 47391dc49124ac43a50ffb007258eccf ""
   "../results/figures/did_loan_amount_expamount_march_dummy.pdf" 1701931588 56487 cbe53ca6e29970d9139d8f26d4b3438c ""
   "../results/figures/did_loan_amount_exposure_dummy.pdf" 1701931588 56707 8a8694ccec2ec63412fc41c061705ccd ""
@@ -11,12 +11,12 @@
   "../results/figures/fed_mbs_amount_by_month_example_larg4.pdf" 1701933915 18301 9f2c34e56dd8ebd796f61fe11c1a0204 ""
   "../results/figures/fed_mbs_amount_by_month_example_retail.pdf" 1701933915 18442 854605be18c37bbb7bacc2ad828bfe0f ""
   "../results/figures/fed_monthly_price_mean_by_coupon.png" 1702237470 165611 bcfac6842e57ba9063d25b68641a0c5d ""
-  "../results/figures/fed_monthly_trade_amount_by_coupon.pdf" 1702237470 15062 9b070cc6bf63467c3ee2dc3a75d47692 ""
+  "../results/figures/fed_monthly_trade_amount_by_coupon.pdf" 1702238334 15501 3fcba7fab8e5985f1e570fb4798e39cb ""
   "../results/figures/fed_monthly_trade_amount_by_coupon.png" 1702235535 169381 9c6c9be54a1d1eec21ebdb6bc6bf4573 ""
   "../results/figures/ob_monthly_trade_amount_by_coupon_all_area.pdf" 1702237470 16536 1b99879a626ae74593f7ad46dd200fbd ""
-  "../results/figures/ob_monthly_trade_amount_by_noterate_all_area_legend_colors.pdf" 1702237470 18532 12305e54af944e7202c3b023bbecd779 ""
+  "../results/figures/ob_monthly_trade_amount_by_noterate_all_area_legend_colors.pdf" 1702238334 18576 57b2b8a43f5065638c3cb9410c43b005 ""
   "../results/tables/fed_mbs_amount_by_counterparty.tex" 1701933915 963 fc8997c6573015428599c397801b36fb ""
-  "/Users/gisellelab/Work/QE_Covid/reports/did_exposure_report.tex" 1702237648 10620 c2979268790f5ca39fc731d57d183ca6 ""
+  "/Users/gisellelab/Work/QE_Covid/reports/did_exposure_report.tex" 1702238442 10532 3a3a785a7d6c41f89e45016c98a467f3 ""
   "/usr/local/texlive/2022/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc" 1136849721 2900 1537cc8184ad1792082cd229ecc269f4 ""
   "/usr/local/texlive/2022/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/local/texlive/2022/texmf-dist/fonts/tfm/jknappen/ec/tcrm1095.tfm" 1136768653 1536 02c06700a42be0f5a28664c7273f82e7 ""
@@ -115,9 +115,9 @@
   "/usr/local/texlive/2022/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1647878959 4410336 7d30a02e9fa9a16d7d1f8d037ba69641 ""
   "/usr/local/texlive/2022/texmf-var/web2c/pdftex/pdflatex.fmt" 1652674088 2826452 4f53d9de205f8f0a7dd505b85fa7118e ""
   "/usr/local/texlive/2022/texmf.cnf" 1647878952 577 209b46be99c9075fd74d4c0369380e8c ""
-  "did_exposure_report.aux" 1702237650 5213 2e1f9b5b6292ebd98a811fce90096593 "pdflatex"
-  "did_exposure_report.out" 1702237650 608 fa4a8384b08ae3842fb83bc8c3562f60 "pdflatex"
-  "did_exposure_report.tex" 1702237648 10620 c2979268790f5ca39fc731d57d183ca6 ""
+  "did_exposure_report.aux" 1702238444 5213 762e6d5ce7fd2a7845e4e594bedb8c72 "pdflatex"
+  "did_exposure_report.out" 1702238444 608 fa4a8384b08ae3842fb83bc8c3562f60 "pdflatex"
+  "did_exposure_report.tex" 1702238442 10532 3a3a785a7d6c41f89e45016c98a467f3 ""
   (generated)
   "did_exposure_report.aux"
   "did_exposure_report.log"
