@@ -123,7 +123,7 @@ There are 931 from  14873 observations in this period that have a missing counte
 \section{Dynamic DiD Exposure Analysis}
 
 The dynamic DiD analysis is based on the following equation:
-$$y_{ijtc} = \alpha + \sum_\tau \beta_\tau \times 1({\tau}=t)  \times QE_{i} + \nu_{t,c} + \nu_{t,i} +\psi_{j} + \epsilon_{ijtc}$$
+$$y_{ijtc} = \alpha + \sum_\tau \beta_\tau \times 1({\tau}=t)  \times QE_{ic} + \nu_{t,c} + \nu_{t,i} +\psi_{j} + \epsilon_{ijtc}$$
 where $y_{ijtc}$ is rate of winner bid or loan amount for loans sold to investor $i$ from seller $j$ in month $t$ for coupon segment $c$. The variable $QE_{i}$ is either the exposure dummy or the exposure level. The exposure level is defined as the amount of MBS purchased by the FED in March 2020. When a dummy is used, the variable takes the value of 1 if the investor has exposure and 0 otherwise. 
 
 The investors that we could identify as having exposure are J.P. Morgan Chase, Wells Fargo, and Citibank. The results are shown below.  The clearer effect is on the winning bid, there is an increase in the average winning bid after March 2020 for the exposed investors. Robustness checks on the fixed effects did not change the results.
@@ -139,7 +139,7 @@ There is plenty of run for improvements here (more controls, improve crosswalks,
         \includegraphics[width=0.998\textwidth]{../results/figures/did_winner_bid_exposure_march_dummy.pdf}
         \caption{ Winner bid }\label{fig:winner_bid}
        \end{subfigure}
-       \caption{Effect of QE on Ob Auctions using exposure dummy.}\label{fig:did_exp_amount}
+       \caption{Effect of QE on Ob Auctions using exposure dummy on March 2020.}\label{fig:did_exp_amount}
      \begin{minipage}{\textwidth}
         \footnotesize{\textit{Notes:}  The figure coefficients of the regression above for loan amounts and winner bid. The vertical line is March 1.  Robust standard errors are used. }
         \end{minipage}
@@ -156,7 +156,7 @@ There is plenty of run for improvements here (more controls, improve crosswalks,
         \includegraphics[width=0.998\textwidth]{../results/figures/did_winner_bid_expamount_march_dummy.pdf}
         \caption{ Winner bid }\label{fig:winner_bid}
        \end{subfigure}
-       \caption{Effect of QE on Ob Auctions using exposure amount purchase.}\label{fig:did_exp_amount}
+       \caption{Effect of QE on Ob Auctions using exposure amount purchase on March 2020.}\label{fig:did_exp_amount}
      \begin{minipage}{\textwidth}
         \footnotesize{\textit{Notes:}  The figure coefficients of the regression above for loan amounts and winner bid. The vertical line is March 1.  Robust standard errors are used. }
         \end{minipage}
@@ -164,5 +164,38 @@ There is plenty of run for improvements here (more controls, improve crosswalks,
   
 
 
+  \begin{figure}[h]
+    \centering
+    \begin{subfigure}[b]{0.49\textwidth}
+        \includegraphics[width=0.998\textwidth]{../results/figures/did_loan_amount_exposure_dummy.pdf}
+        \caption{ Loan amount }\label{fig:loan_amount}
+       \end{subfigure}
+       \begin{subfigure}[b]{0.49\textwidth}
+        \includegraphics[width=0.998\textwidth]{../results/figures/did_winner_bid_exposure_dummy.pdf}
+        \caption{ Winner bid }\label{fig:winner_bid}
+       \end{subfigure}
+       \caption{Robustness: Effect of QE on Ob Auctions using exposure dummy by month. }\label{fig:did_exp_amount}
+     \begin{minipage}{\textwidth}
+        \footnotesize{\textit{Notes:}  The figure coefficients of the regression above for loan amounts and winner bid. The vertical line is March 1.  Robust standard errors are used. }
+        \end{minipage}
+  \end{figure}
+  
+
+\begin{figure}[h]
+    \centering
+    \begin{subfigure}[b]{0.49\textwidth}
+        \includegraphics[width=0.998\textwidth]{../results/figures/did_loan_amount_expamount.pdf}
+        \caption{ Loan amount }\label{fig:loan_amount}
+       \end{subfigure}
+       \begin{subfigure}[b]{0.49\textwidth}
+        \includegraphics[width=0.998\textwidth]{../results/figures/did_winner_bid_expamount.pdf}
+        \caption{ Winner bid }\label{fig:winner_bid}
+       \end{subfigure}
+       \caption{Robustness: Effect of QE on Ob Auctions using exposure amount purchase by month. }\label{fig:did_exp_amount}
+     \begin{minipage}{\textwidth}
+        \footnotesize{\textit{Notes:}  The figure coefficients of the regression above for loan amounts and winner bid. The vertical line is March 1.  Robust standard errors are used. }
+        \end{minipage}
+  \end{figure}
+  
 
 \end{document}
