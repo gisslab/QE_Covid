@@ -346,6 +346,15 @@ if __name__ == '__main__':
     df_auc.columns
 
     # %%
+    # how many sellers
+    df_auc['HedgeClientKey'].nunique()
+
+    # %%
+    # how many banks
+    df_auc['CommittedInvestorKey'].nunique()
+
+
+    # %%
     # now create time series at seller, investor level
     var_time = 'MonthYear'
     var_rate = 's_coupon'
@@ -414,4 +423,11 @@ if __name__ == '__main__':
     # %%
     #  save to csv
     df.to_csv(f'{apa.auction_save_folder}/ob_fed_exposure_measure.csv', index=False)
+
+    # %%
+    # group by seller, and see how many baks, and exposure on march 2020
+    a = df.groupby('HedgeClientKey').agg({'CommittedInvestorKey': 'nunique', 'exposure_march_2020': 'sum'}).sort_values(by='exposure_march_2020', ascending=False).reset_index()
+
+    # %%
+    a.describe()    
 # %%
