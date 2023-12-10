@@ -28,9 +28,9 @@ auction_save_folder = '/project/houde/mortgages/QE_Covid/results/'
 
 filename = "MBS_data_new.csv"
 
-date_init = '2020-01-01'
+date_init = '2019-10-01'
 
-date_end = '2021-04-30'
+date_end = '2021-06-30'
 
 agencies = ['FNMA', 'FHLMC']
 
@@ -454,7 +454,7 @@ if __name__ == '__main__':
     )   
 
     # %%
-    # **************************** scatter price by month
+    # **************************** scatter price by month ************************************ #
     # by coupon
     # df_merged_1m = df_merged_1m[df_merged_1m.Coupon.isin([ 4.0])]
 
@@ -492,13 +492,16 @@ if __name__ == '__main__':
 
     # %% 
 
-
+    # **************************** Area graph ************************************ #
     # ***** Begin area graph for trade amount by coupon ***** #
     # 
     # Create nice figure were we plot the percent of trade amount in the month by coupon, all forward months
     g = ['FirstMonthYear']
     df_coupons = df_merged.groupby(['Coupon', 'FirstMonthYear'])['fed_trade_amount'].sum().reset_index()
     df_coupons.columns = [ 'Coupon', 'FirstMonthYear', 'fed_trade_amount']
+
+    print("Min date: ", df_coupons.FirstMonthYear.min())
+    print("Max date: ", df_coupons.FirstMonthYear.max())
 
     # df_coupons['trade_amount_total'] = df_coupons.groupby(g)['fed_trade_amount'].transform('sum')
 
@@ -556,14 +559,29 @@ if __name__ == '__main__':
                 right=0.96, 
                 hspace=0.01, 
                 wspace=0.01)
-
     
-    ax.legend(loc='upper right',title='Coupon')
+
+    # create list of ticks and increse the onth by 3 for i in range(min_d.month, max_d.month + 1, 3)]
+    all_dates_df =df_coupons.FirstMonthYear.sort_values().unique()
+    # convert to datetime
+    all_dates_df = [pd.to_datetime(x) for x in all_dates_df]
+    # now format dates to only show year-month
+    list_ticks = [x.strftime('%Y-%m') for x in all_dates_df]
+    # leave only first quarter
+    list_ticks = [x for i,x in enumerate(list_ticks) if i % 3 == 0]
+    all_dates_df = [x for i,x in enumerate(all_dates_df) if i % 3 == 0]
+    print(list_ticks)
+
+    # pass ticks to xticks
+    plt.xticks(all_dates_df, list_ticks, rotation=45)
+    
+    handles, labels = ax.get_legend_handles_labels()
+    ax.legend(handles[::-1], labels[::-1], loc='upper left',title='Coupon')
     # legend name Coupon
     ax.set_title('Monthly trade amount by coupon')
     ax.set_ylabel('Trade amount (million $)')
     ax.set_xlabel('Year-Month')
-    plt.xticks(rotation=45)
+    # plt.xticks(rotation=45)
     plt.savefig(f'{auction_save_folder}/figures/fed_monthly_trade_amount_by_coupon.png', dpi=300)
 
     # ***** End area graph for trade amount by coupon ***** #

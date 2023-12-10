@@ -87,6 +87,14 @@ def tide_auction_data(df,
                       setrates = [] ):
     """
     Receives auction data daily time series cleaned by auction_prices_analysis module and returns cleaner data ready to be used in plot function.
+
+    df : dataframe with auction data.
+    min_date : minimum date to filter the data.
+    max_date : maximum date to filter the data.
+    min_daily_count : minimum number of observations per day to keep the day.
+    vartime : time unit, e.g. FirstMonthYear, Trading_Date.
+    interval : Filter by <varrate> range in interval (inclusive), e.g. [2,4] for coupon range.
+    setrates : Keep only the <varrate> in the list, e.g. [2.5, 3.0, 3.5, 4.0] for coupon list.
     """
     print("Type of vartime var in pd", type(df[vartime][0]))
     # Convert to datetime
@@ -492,6 +500,8 @@ def main():
     # choosing note rate range
     interval = (2.5,4) #ap.couponrange_list[2]
     set_coupons = [ 2.5, 3.0, 3.5, 4.0] #1.5, 2.0,
+    set_coupons_extended = [1.5, 2.0,  2.5, 3.0, 3.5, 4.0, 4.5] #1.5, 2.0,
+    interval_extended = (min(set_coupons_extended), max(set_coupons_extended))
 
     # * dataframe 1: by auction type, coupon
     # building path 
@@ -513,6 +523,7 @@ def main():
     df_ts = read_data(file = f'timeseries/{filename_timeseries_coup}',
                         path = auction_data_folder,
                         datetime_vars=['FirstMonthYear'])
+
     
     # * dataframe 3: by month year
 
@@ -538,6 +549,10 @@ def main():
     ts = tide_auction_data(df_ts,
                             interval= interval,
                             setrates= set_coupons)
+
+    ts_extended = tide_auction_data(df_ts,
+                        interval= interval_extended,
+                        setrates= set_coupons_extended)
 
     ts_all.head()
     # %%
@@ -601,7 +616,6 @@ def main():
     
 
     # %% 
-
     # collapse coupons by averaging the prices by day, auction type
     # create normalize price winner_bid_mean - PX_Last
     ts_ob_bl_1['winner_bid_mean_n'] = ts_ob_bl_1['winner_bid_mean'] - ts_ob_bl_1['PX_Last']
@@ -610,7 +624,9 @@ def main():
     ts_ob_bl_1['w_winner_bid_mean_n'] = ts_ob_bl_1['winner_bid_mean_n'] * ts_ob_bl_1['LoanAmount_sum']/ ts_ob_bl_1['total_loan_amount_day']
     ts_ob_bl_1_collapse = ts_ob_bl_1.groupby(['FirstMonthYear']).agg({'w_winner_bid_mean_n': 'sum'}).reset_index()
 
-    # ***************************** Plots ******************************************* #
+    # ************************************************************************************************
+    # ****************************** Plot ************************************************************
+    # ************************************************************************************************
 
 
     # %%
@@ -822,9 +838,191 @@ def main():
     f,a = plot(ts_coupon, 'NoteRate_mean', maturity, initial_stat =  "Note rate", empty_label = True, 
                 color = 'tab:blue', fig = f, ax = a, save=True, varrate = "", filenameend=f'c{coupon*10}',  horizontal_lines = [])
 
+    # %%
+    # ****************************************** Other plots:  ******************************************* #
+    # %%
+    ts_extended.columns
+
+    # %%
+    # *************************** Loan amount area graphs all coupons ********************************** #
+    df_coupons = ts_extended[['Coupon', 'FirstMonthYear', 'LoanAmount_sum']].copy()
+
+    date_init_ = '2019-10-01'
+
+    date_end_ = '2021-06-30'
+
+    df_coupons = df_coupons[(df_coupons.FirstMonthYear >= date_init_) & (df_coupons.FirstMonthYear <= date_end_)]
+
+    # uses ts_extended
+    # graph style taken from fed ob script
+
+    for c in df_coupons.Coupon.unique():
+        for m in df_coupons.FirstMonthYear.unique():
+
+            # if row c, m is not in df_coupons, then add it with 0 in fed_trade_amount
+            if df_coupons[(df_coupons.Coupon == c) & (df_coupons.FirstMonthYear == m)].shape[0] > 0:
+                continue
+            else:
+ 
+                df_coupons = pd.concat([df_coupons, 
+                                        pd.DataFrame({'Coupon': [c], 'FirstMonthYear': [m], 'LoanAmount_sum': [0]})], 
+                                       ignore_index=True)
+                # print("Added " , c, m)
 
 
+    # create dictionary with key = coupon and value = array of trade per month
+
+    dict_amount_per_coupon = {}
+
+    for c in df_coupons.Coupon.unique():
+        # order by FirstMonthYear
+        df_coupons = df_coupons.sort_values('FirstMonthYear')
+        current_coupon = df_coupons[df_coupons.Coupon == c]
+        dict_amount_per_coupon[c] = current_coupon.LoanAmount_sum.values
+        # print length
+        print(c, " - ", len(dict_amount_per_coupon[c]))
+
+    # order by coupon
+    dict_amount_per_coupon = dict(sorted(dict_amount_per_coupon.items()))
+
+    # %%
+    fig, ax = plt.subplots()
+
+    monthyear = df_coupons.FirstMonthYear.sort_values().unique()
+
+    ax.stackplot(monthyear, 
+                dict_amount_per_coupon.values(),
+                labels=dict_amount_per_coupon.keys(), alpha=0.7)
     
+    plt.subplots_adjust(top=0.925, 
+                bottom=0.20, 
+                left=0.12, 
+                right=0.96, 
+                hspace=0.01, 
+                wspace=0.01)
+
+ # create list of ticks and increse the onth by 3 for i in range(min_d.month, max_d.month + 1, 3)]
+    all_dates_df =df_coupons.FirstMonthYear.sort_values().unique()
+    # convert to datetime
+    all_dates_df = [pd.to_datetime(x) for x in all_dates_df]
+    # now format dates to only show year-month
+    list_ticks = [x.strftime('%Y-%m') for x in all_dates_df]
+    # leave only first quarter
+    list_ticks = [x for i,x in enumerate(list_ticks) if i % 3 == 0]
+    all_dates_df = [x for i,x in enumerate(all_dates_df) if i % 3 == 0]
+    print(list_ticks)
+
+    # pass ticks to xticks
+    plt.xticks(all_dates_df, list_ticks, rotation=45)
+    
+     # reorder legend last is first 
+    handles, labels = ax.get_legend_handles_labels()
+    ax.legend(handles[::-1], labels[::-1], loc='upper left',title='Coupon')
+
+    ax.set_title('Monthly trade amount by coupon')
+    ax.set_ylabel('Trade amount (million $)')
+    ax.set_xlabel('Year-Month')
+    plt.savefig(f'{auction_save_folder}/ob_monthly_trade_amount_by_coupon_all_area.png', dpi=300)
+
+    # %%
+    # ***************************************** Note rate version ******************************************* #
+    # * Produce the same graph but by note rates
+
+    #  /project/houde/mortgages/QE_Covid/data/data_auction/clean_data/timeseries/combined_auctions_jan2018-jul2022_cleaned_mat30_loan1_timeseries_NoteRate_MonthYear.csv
+    var_rate = 'NoteRate'
+
+    filename_timeseries_coup = f'{auction_filename}_mat{maturity}_loan{loantype}_timeseries_{var_rate}_{var_time}'
+
+
+    df_ts = read_data(file = f'timeseries/{filename_timeseries_coup}',
+                        path = auction_data_folder,
+                        datetime_vars=['FirstMonthYear'])
+
+
+    ts_extended = tide_auction_data(df_ts,
+                        varrate = var_rate,
+                        interval= interval_extended,
+                        setrates= [])
+    # n
+
+    # %%
+    df_noterates = ts_extended[['NoteRate', 'FirstMonthYear', 'LoanAmount_sum']].copy()
+
+    df_noterates = df_noterates[(df_noterates.FirstMonthYear >= date_init_) & (df_noterates.FirstMonthYear <= date_end_)]
+
+    # uses ts_extended
+
+    for c in df_noterates.NoteRate.unique():
+        for m in df_noterates.FirstMonthYear.unique():
+
+            # if row c, m is not in df_coupons, then add it with 0 in fed_trade_amount
+            if df_noterates[(df_noterates.NoteRate == c) & (df_noterates.FirstMonthYear == m)].shape[0] > 0:
+                continue
+            else:
+ 
+                df_noterates = pd.concat([df_noterates, 
+                                        pd.DataFrame({'NoteRate': [c], 'FirstMonthYear': [m], 'LoanAmount_sum': [0]})], 
+                                       ignore_index=True)
+
+
+    # create dictionary with key = noterate and value = array of trade per month
+
+    dict_amount_per_noterate = {}
+
+    for c in df_noterates.NoteRate.unique():
+        # order by FirstMonthYear
+        df_noterates = df_noterates.sort_values('FirstMonthYear')
+        current_noterate = df_noterates[df_noterates.NoteRate == c]
+        dict_amount_per_noterate[c] = current_noterate.LoanAmount_sum.values
+        # print length
+        print(c, " - ", len(dict_amount_per_noterate[c]))
+
+    # order by noterate
+    dict_amount_per_noterate = dict(sorted(dict_amount_per_noterate.items()))
+
+    # %%
+    fig, ax = plt.subplots()
+
+    monthyear = df_noterates.FirstMonthYear.sort_values().unique()
+
+    ax.stackplot(monthyear,
+                dict_amount_per_noterate.values(),
+                labels=dict_amount_per_noterate.keys(), alpha=0.7)
+    
+    plt.subplots_adjust(top=0.925,
+                bottom=0.20,
+                left=0.12,
+                right=0.96,
+                hspace=0.01,
+                wspace=0.01)
+    
+    # create list of ticks and increse the onth by 3 for i in range(min_d.month, max_d.month + 1, 3)]
+    all_dates_df = [pd.to_datetime(x) for x in monthyear]
+    list_ticks = [x.strftime('%Y-%m') for x in all_dates_df]
+    list_ticks = [x for i,x in enumerate(list_ticks) if i % 3 == 0]
+    all_dates_df = [x for i,x in enumerate(all_dates_df) if i % 3 == 0]
+    print(list_ticks)
+
+    # pass ticks to xticks
+    plt.xticks(all_dates_df, list_ticks, rotation=45)
+
+    # ax.legend(loc='upper left',title='Note rate')
+    # legend outside 
+    # ax.legend(loc='upper left', bbox_to_anchor=(1.05, 1),title='Note rate')
+
+    # reorder legend last is first 
+    handles, labels = ax.get_legend_handles_labels()
+    ax.legend(handles[::-1], labels[::-1], loc='upper left', bbox_to_anchor=(1.05, 1),title='Note rate')
+    # legend name Coupon
+
+    ax.set_title('Monthly trade amount by note rate')
+    ax.set_ylabel('Trade amount (million $)')
+    ax.set_xlabel('Year-Month')
+    plt.savefig(f'{auction_save_folder}/ob_monthly_trade_amount_by_noterate_all_area_legend_colors.png', dpi=300)    # %%
+
+    # %%
+    # * version of graph with note rates is is a color map
+
 
     # ****************************** Table Auctions  ********************************* #
 

@@ -722,8 +722,8 @@ def main():
 
     # var_time = 'CommittedDate'
     var_time = 'MonthYear'
-    # var_rate = 'NoteRate'
-    var_rate = 's_coupon'
+    var_rate = 'NoteRate'
+    # var_rate = 's_coupon'
 
 
     # %%
@@ -752,7 +752,6 @@ def main():
     )
 
     # %%
-
     # * By rates or coupons 
 
 
