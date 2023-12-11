@@ -56,6 +56,35 @@ collapsed_note_rate_list = [2.5, 3, 3.75, 4.25, 4.5,  5,  5.5,  6]
 
 interval = (2.5,4) # Coupons ot note rate
 
+# color dictionary for all note rates
+
+
+def create_color_dict(list_nr):
+    """
+    This function creates a dictionary with the note rates and the colors to use in the plots.
+    """
+
+    color_dict = {}
+
+    # choose python color list
+    colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 
+            'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan',
+            'xkcd:lightblue', 'xkcd:lightgreen', 'gold', 'salmon',
+            'orchid', 'tan','lavender',
+            'lightpink', 'lightsteelblue', 'lime', 'linen', 'magenta', 'maroon',
+            'mediumaquamarine', 'lightcoral','mediumblue', 'mediumorchid', 'mediumpurple']
+    
+    len_colors = len(colors)
+
+    for i, nr in enumerate(list_nr):
+
+        index = i % len_colors
+        color_dict[nr] = colors[index]
+
+    return color_dict
+
+
+
 #%%
 
 # * functions
@@ -839,12 +868,15 @@ def main():
                 color = 'tab:blue', fig = f, ax = a, save=True, varrate = "", filenameend=f'c{coupon*10}',  horizontal_lines = [])
 
     # %%
+    # **************************************************************************************************** #
     # ****************************************** Other plots:  ******************************************* #
     # %%
     ts_extended.columns
 
+
     # %%
     # *************************** Loan amount area graphs all coupons ********************************** #
+
     df_coupons = ts_extended[['Coupon', 'FirstMonthYear', 'LoanAmount_sum']].copy()
 
     date_init_ = '2019-10-01'
@@ -901,7 +933,7 @@ def main():
                 hspace=0.01, 
                 wspace=0.01)
 
- # create list of ticks and increse the onth by 3 for i in range(min_d.month, max_d.month + 1, 3)]
+    # create list of ticks and increse the onth by 3 for i in range(min_d.month, max_d.month + 1, 3)]
     all_dates_df =df_coupons.FirstMonthYear.sort_values().unique()
     # convert to datetime
     all_dates_df = [pd.to_datetime(x) for x in all_dates_df]
@@ -910,7 +942,7 @@ def main():
     # leave only first quarter
     list_ticks = [x for i,x in enumerate(list_ticks) if i % 3 == 0]
     all_dates_df = [x for i,x in enumerate(all_dates_df) if i % 3 == 0]
-    print(list_ticks)
+    print(list_ticks) 
 
     # pass ticks to xticks
     plt.xticks(all_dates_df, list_ticks, rotation=45)
@@ -941,9 +973,11 @@ def main():
 
     ts_extended_nr = tide_auction_data(df_ts_nr,
                         varrate = var_rate,
-                        interval= interval_extended,
+                        interval= [1,7],
                         setrates= [])
-    # n
+    
+    unique_nr_sort = sorted(ts_extended_nr.NoteRate.unique())
+    color_dict_nr = create_color_dict(unique_nr_sort)
 
     # %%
     df_noterates = ts_extended_nr[['NoteRate', 'FirstMonthYear', 'LoanAmount_sum']].copy()
@@ -987,7 +1021,9 @@ def main():
 
     ax.stackplot(monthyear,
                 dict_amount_per_noterate.values(),
-                labels=dict_amount_per_noterate.keys(), alpha=0.7)
+                labels=dict_amount_per_noterate.keys(), 
+                alpha=0.7,
+                colors = color_dict_nr.values())
     
     plt.subplots_adjust(top=0.925,
                 bottom=0.20,
@@ -1016,7 +1052,7 @@ def main():
 
     # reorder legend last is first 
     handles, labels = ax.get_legend_handles_labels()
-    ax.legend(handles[::-1], labels[::-1], loc='upper left', bbox_to_anchor=(1.05, 1),title='Note rate')
+    ax.legend(handles[::-1], labels[::-1], loc='upper left', bbox_to_anchor=(1.05, 1),title='Note rate', ncol=2)
     # legend name Coupon
 
     ax.set_title('Monthly trade amount by note rate')
@@ -1025,7 +1061,69 @@ def main():
     plt.savefig(f'{auction_save_folder}/ob_monthly_trade_amount_by_noterate_all_area_legend_colors.pdf', bbox_inches='tight')    # %%
 
     # %%
-    # * version of graph with note rates is is a color map
+    # ****************************** Note rate by coupon ******************************************* #
+
+    leg_side = 'left'
+
+    coupons = ts_extended.Coupon.unique()
+    coupons = sorted(coupons)
+    print("Coupons ", coupons)
+
+    print("Note rates ", dict_amount_per_noterate.keys())
+
+    for c in coupons:
+
+        print("Coupon: ", c)
+        fig, ax = plt.subplots()
+
+        # keep only noterates in range min and max of coupon , filter dict_amount_per_noterate
+        ts_c = ts_extended[ts_extended['Coupon'] == c].copy()
+        print(ts_c.NoteRate_min.unique())
+        min_noterate = min(ts_c.NoteRate_min)
+        max_noterate = max(ts_c.NoteRate_max)
+
+
+        nr_set = [x for x in dict_amount_per_noterate.keys() if x >= min_noterate and x <= max_noterate]
+        
+        dict_c = {k: dict_amount_per_noterate[k] for k in nr_set}
+
+        color_this_nr = [color_dict_nr[x] for x in nr_set]
+
+        ax.stackplot(monthyear,
+                    dict_c.values(),
+                    labels=dict_c.keys(),
+                    alpha=0.7,
+                    colors = color_this_nr)
+        
+        plt.subplots_adjust(top=0.925,
+                    bottom=0.20,
+                    left=0.12,
+                    right=0.96,
+                    hspace=0.01,
+                    wspace=0.01)
+        
+        # create list of ticks and increse the onth by 3 for i in range(min_d.month, max_d.month + 1, 3)]
+        all_dates_df = [pd.to_datetime(x) for x in monthyear]
+        list_ticks = [x.strftime('%Y-%m') for x in all_dates_df]
+        list_ticks = [x for i,x in enumerate(list_ticks) if i % 3 == 0]
+        all_dates_df = [x for i,x in enumerate(all_dates_df) if i % 3 == 0]
+        print(list_ticks)
+
+        # pass ticks to xticks
+        plt.xticks(all_dates_df, list_ticks, rotation=45)
+
+        ax.legend(loc=f'upper {leg_side}',title='Note rate')
+        # legend outside 
+
+        # reorder legend last is first 
+        # handles, labels = ax.get_legend_handles_labels()
+        # ax.legend(handles[::-1], labels[::-1], loc='upper left', bbox_to_anchor=(1.05, 1),title='Note rate')
+        # legend name Coupon
+
+        ax.set_title(f'Monthly trade amount by note rate, coupon {c}')
+        ax.set_ylabel('Trade amount (million $)')
+        ax.set_xlabel('Year-Month')
+        plt.savefig(f'{auction_save_folder}/ob_monthly_trade_amount_by_noterate_c{c*10}_area_legend_colors_{leg_side}.pdf')  # bbox_inches='tight'
 
 
     # ****************************** Table Auctions  ********************************* #
