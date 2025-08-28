@@ -1,6 +1,6 @@
 # QE_Covid: Quantitative Easing Effects on Secondary Auction Markets
 
-This project analyzes the effects of Federal Reserve Quantitative Easing (QE) policies on secondary mortgage auction markets during the COVID-19 period. The study examines how Fed MBS purchases impacted auction prices and bidding behavior in the mortgage-backed securities market.
+This exploratory project analyzes the effects of Federal Reserve Quantitative Easing (QE) policies on secondary mortgage auction markets during the COVID-19 period. The goal is to examine how Fed MBS purchases impacted auction prices and bidding behavior in the mortgage-backed securities market.
 
 ## Disclaimer
 
